@@ -1,11 +1,14 @@
 load("../output/dict.RData")
+load("../output/dict2.RData")
 
 dict <- as.matrix(dict)
-
 dict <- dict[nchar(dict) > 1] # no single character words
 dict <- unique(dict)
 
-for(i in 1:length(dict)){
-  comb <- nchar(dict[i]) * (nchar(dict[i])-1) / 2
-}
+
+dict2 <- as.matrix(dict2)
+dict2 <- cbind(dict2, rep(0, nrow(dict2)))
+colnames(dict2) <- c("word", "error")
+
+
 
