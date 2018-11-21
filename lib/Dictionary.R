@@ -25,6 +25,8 @@ dict <- tidytext::tidy(corpus) %>%
   select(text) %>%
   unnest_tokens(dictionary, text)
 
+dict <- as.matrix(dict)
+dict <- dict[nchar(dict) > 1] # no single character words
+dict <- unique(dict)
+
 save(dict, file = "../output/dict.RData")
-
-

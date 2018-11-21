@@ -29,8 +29,8 @@ dict2 <- tidytext::tidy(corpus) %>%
   select(text) %>%
   unnest_tokens(dictionary, text)
 
+dict2 <- as.matrix(dict2)
+dict2 <- cbind(dict2, rep(0, nrow(dict2)))
+colnames(dict2) <- c("word", "error")
+
 save(dict2, file = "../output/dict2.RData")
-
-load(file = "C:/Users/Xiaojie Wei/Documents/GitHub/Fall2018-Project4-sec1--sec1proj4_grp7/output/dict2.RData")
-#dict$ncharact <- nchar(dict$dictionary)
-

@@ -1,3 +1,7 @@
+load("../output/dict.RData")
+load("../output/dict2.RData")
+load("../output/digrams.RData")
+
 
 d2 <- dict2[nchar(dict2[,1]) < 16,]
 

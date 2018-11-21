@@ -1,3 +1,5 @@
+load("../output/dict.RData")
+
 
 ####For creating a subdictionary for word of fixed length
 d <- dict[nchar(dict) < 16]
@@ -20,9 +22,7 @@ for(i in d){
 }
 
 
-a[3, 1,,]
-
-
+save(a, file = "../output/digrams.RData")
 
 #use word of length 3 as an example
 wordlist <- c('abc', 'def','ghif')
