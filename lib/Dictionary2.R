@@ -17,11 +17,12 @@ tesseract <- strsplit(tesseract,"\n")[[1]]
 tesseract <- tesseract[tesseract!=""]
 bag <- str_split(tesseract," ")
 bag <- unlist(bag)
+toSpace <- content_transformer(function(x, pattern) gsub(pattern, " ", x))
 
 corpus <- VCorpus(VectorSource(bag))%>%
   tm_map(content_transformer(tolower))%>%
+  tm_map(toSpace, "\\W")%>%
   tm_map(removePunctuation)%>%
-  tm_map(removeNumbers)%>%
   tm_map(removeWords, character(0))%>%
   tm_map(stripWhitespace)
 
