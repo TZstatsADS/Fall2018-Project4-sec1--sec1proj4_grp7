@@ -6,12 +6,12 @@ library(tidyverse)
 
 a  <- Corpus(DirSource("../data/ground_truth/"), readerControl = list(language="lat")) #specifies the exact folder where my text file(s) is for analysis with tm.
 a <- tm_map(a, content_transformer(tolower))
-sw <- c("the", "and", "for", "that", "with", "this", "will", "are", "has", "not")
+sw <- c("the", "and", "for", "that", "with", "this", "will", "are", "has", "not", "our", "have", "was", "which")
 a <- tm_map(a , stripWhitespace)
 a <- tm_map(a, removeWords, sw)
 
 adtm <- DocumentTermMatrix(a)
-l <- LDA(adtm, k = 2, control = list(seed = 1234))
+l <- LDA(adtm, k = 4, control = list(seed = 1234))
 
 ap_topics <- tidy(l, matrix = "beta")
 
