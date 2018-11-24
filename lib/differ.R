@@ -9,10 +9,10 @@ load(file = "../output/dict.RData")
 # @v this is a vector with all letters except l 
 # @beg this is a string of all the characters in a word before i
 # @end this is a string of all the characters in a word after i 
-@ #candidates this is the list of all possible strings that differ by one character, i, from w 
-@ #cand this is is the list of all possible strings that differ by one character,i, from w that match with a word in a dictionary 
+# @candidates this is the list of all possible strings that differ by one character, i, from w 
+# @cand this is is the list of all possible strings that differ by one character,i, from w that match with a word in a dictionary 
 
-# @Finding words that differ by two letters
+# Finding words that differ by two letters
 
 # @w this is the input word
 # @l_i this is the letter at position i 
@@ -22,8 +22,8 @@ load(file = "../output/dict.RData")
 # @beg this is a string of all the characters in a word before i
 # @mid this is a string of all the chracters in a word between i and j
 # @end this is a string of all the characters in a word after j
-@ #candidates this is the list of all possible strings that differ by two characters, i, and j from w
-@ #cand this is is the list of all possible strings that differ by characters i,j, from w that match with a word in a dictionary 
+# @candidates this is the list of all possible strings that differ by two characters, i, and j from w
+# @cand this is is the list of all possible strings that differ by characters i,j, from w that match with a word in a dictionary 
 
 
 differCandidates <- function(w){
