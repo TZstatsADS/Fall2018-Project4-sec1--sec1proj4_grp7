@@ -6,10 +6,10 @@
 we can do topic modelling small clusters around errors
 
 + stemming: going + gone... debatable
-+ stopwords : ggtext
++ stopwords : ggtext + pronouns
 
 
-+ matching words. Github, or enough line by line? alignment algorith,: 
++ matching words. Github, or enough line by line? alignment algorithm: 
 look for OCR confusion matrix on the internet 
 *We decided to replace*
 
