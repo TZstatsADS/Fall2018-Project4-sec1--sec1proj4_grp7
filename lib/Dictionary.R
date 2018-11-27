@@ -5,7 +5,7 @@ library(tidytext)
 library(broom)
 
 dictionary <- function(filenames){
-  filenames <- truthFiles
+  #filenames <- truthFiles
   groundTruth <- ""
   for(x in filenames) groundTruth <- paste(groundTruth, readChar(x, file.info(x)$size))
   
