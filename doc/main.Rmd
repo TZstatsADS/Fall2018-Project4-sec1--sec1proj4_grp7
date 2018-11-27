@@ -43,12 +43,11 @@ h4 { /* Header 4 */
 
 # define what to run
 
-doDic = F # doDic=false means we can choose our own dictionary. It can be groundtruth or other online dictionary. 
-doDetect = F # same as above
-doDigram = F 
+doDic = F # dictionary for groundtruth
+doDetect = F # detection part
+doDigram = F # digram array for groundtruth
 doConfusion = F # compute confusion matrix
 doLDA = F # compute topic modelling
-
 ```
 
 
@@ -114,8 +113,8 @@ for(i in c(1:length(file_name_vec))){
 
 # Step 3 - Error detection
 
+### 3.1 - Data Preparation
 ```{r}
-
 # read files 
 
 truthPath = "../data/ground_truth/"
@@ -134,10 +133,9 @@ testing <- (1:n)[!1:n %in% training]
 
 truthTrain <- truthFiles[training]
 ocrTrain <- ocrFiles[training]
+
 truthTest <- truthFiles[testing]
 ocrTest <- ocrFiles[testing]
-
-
 ```
 
 
@@ -177,6 +175,7 @@ tesseract_vec <- str_split(clean_tesseract_txt," ")[[1]] #1124 tokens
 tesseract_if_clean <- unlist(lapply(tesseract_vec,ifCleanToken)) # source code of ifCleanToken in lib folder
 ```
 
+### 3.2 - Source the files
 ```{r detection}
 # the assigned paper for error detectoin is D2
 # step 1: create the dictionary from groudtruth
@@ -188,28 +187,37 @@ source("../lib/Dictionary.R")
 source("../lib/OCRText.R")
 source("../lib/Digrams.R")
 source("../lib/detect.R")
+```
 
+### 3.3 - Create bag of words and digram array for groungtruth and tesseract data
 
-if(doDic==T) {
-  dictionary("../data/ground_truth/")
+* Create the dictionary from groudtruth dataset
+* Create the OCR bag of word from tesseract dataset
+* Create the digram array including all length of words from groundtruth dataset
+
+```{r}
+if(doDic == T) {
+  dict <- dictionary("../data/ground_truth/")
 } else {
   load("../output/dict.RData")
 }
 
-if(doDic==T){
-  OCRtext("../data/tesseract/")
+if(doDic == T){
+  OCRText <- OCRtext("../data/tesseract/")
 } else {
   load("../output/OCRText.RData")
 }
 
-if(doDigram==T){
-  digram(dict)
+if(doDigram == T){
+  digrams <- digram(dict)
 }else{
   load("../output/digrams.RData")
 }
+```
 
+### 3.4 - Implement detection algorithm
+```{r}
 detect(OCRtext, digrams)
-
 ```
 
 # Step 4 - Error correction
