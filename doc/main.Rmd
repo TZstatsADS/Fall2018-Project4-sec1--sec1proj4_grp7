@@ -193,8 +193,9 @@ source("../lib/detect.R")
 * Create the digram array including all length of words from groundtruth dataset
 
 ```{r}
+# For our dictionary (derived from groundtruth), we use all 100 documents from groundtruth because we want to get a large dictionary. If we only use training dataset (80 documents), the dictionary is too small to include most of words.
 if(doDic == T) {
-  dict <- dictionary("../data/ground_truth/")
+  dict <- dictionary(truthFiles)
 } else {
   load("../output/dict.RData")
 }
