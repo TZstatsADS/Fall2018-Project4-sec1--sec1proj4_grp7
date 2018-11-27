@@ -1,28 +1,36 @@
 load("../output/dict.RData")
 
 
-####For creating a subdictionary for word of fixed length
-d <- dict[nchar(dict) < 16]
-
-N <- 15
-a <- array(0, c(N, (N-1)*N/2, 26, 26))
-
-for(i in d){
-  n <- nchar(i)
-  counter <- 1
-  for(k in 1 : (n-1)){
-    for(l in 2:n){
-      if(k < l){
-        a[n, counter, match(substr(i, k, k), letters), 
-          match(substr(i, l, l), letters)] <- 1 
-        counter <- counter + 1
-      }   
+digram <- function(dict){
+  
+  d <- dict[nchar(dict[,1]) > 1,] # no single character words
+  
+  N <- max(nchar(dict))
+  a <- array(0, c(N, (N-1)*N/2, 26, 26))
+  
+  for(i in d){
+    n <- nchar(i)
+    counter <- 1
+    for(k in 1 : (n-1)){
+      for(l in 2:n){
+        if(k < l){
+          a[n, counter, match(substr(i, k, k), letters), 
+            match(substr(i, l, l), letters)] <- 1 
+          counter <- counter + 1
+        }   
+      }
     }
   }
+  
+  save(a, file = "../output/digrams.RData")
 }
 
 
-save(a, file = "../output/digrams.RData")
+
+
+
+
+
 # 
 # #use word of length 3 as an example
 # wordlist <- c('abc', 'def','ghif')

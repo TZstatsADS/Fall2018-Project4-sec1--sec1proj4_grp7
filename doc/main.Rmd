@@ -201,7 +201,7 @@ if(doDic == T) {
 }
 
 if(doDic == T){
-  OCRText <- OCRtext("../data/tesseract/")
+  OCRText <- OCRtext(ocrTrain)
 } else {
   load("../output/OCRText.RData")
 }

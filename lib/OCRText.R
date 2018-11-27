@@ -32,10 +32,15 @@ OCRText <- function(ocrTrain){
     unnest_tokens(dictionary, text)
   
   dict2 <- as.matrix(dict2)
-  OCRText <- cbind(dict2, rep(0, nrow(dict2)))
-  colnames(OCRText) <- c("word", "error")
+  dict2 <- cbind(dict2, rep(0, nrow(dict2)))
+  colnames(dict2) <- c("word", "error")
   
-  save(OCRText, file = "../output/OCRText.RData")
+  save(dict2, file = "../output/OCRText.RData")
+  
+  # OCRText <- cbind(dict2, rep(0, nrow(dict2)))
+  # colnames(OCRText) <- c("word", "error")
+  # 
+  # save(OCRText, file = "../output/OCRText.RData")
 }
 
 
