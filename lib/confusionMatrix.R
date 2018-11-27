@@ -4,16 +4,14 @@
 # library(tidytext)
 # library(broom)
 
-commonMistakes <- function(truthPath, OCRPath){
+commonMistakes <- function(truthTrain, ocrTrain){
   
-  files <- list.files(path="../data/ground_truth/", pattern="*.txt", full.names=TRUE, recursive=FALSE)
-  groundTruth <- array(NA, c(1, length(files)))
-  for(x in 1:length(files)) groundTruth[,x] <- readChar(files[x], file.info(files[x])$size)
+  groundTruth <- array(NA, c(1, length(truthTrain)))
+  for(x in 1:length(truthTrain)) groundTruth[,x] <- readChar(truthTrain[x], file.info(truthTrain[x])$size)
   groundTruth <- strsplit(groundTruth,"\n")
   
-  files <- list.files(path="../data/tesseract/", pattern="*.txt", full.names=TRUE, recursive=FALSE)
-  tesseract <- array(NA, c(1, length(files)))
-  for(x in 1:length(files)) tesseract[,x] <- readChar(files[x], file.info(files[x])$size)
+  tesseract <- array(NA, c(1, length(ocrTrain)))
+  for(x in 1:length(ocrTrain)) tesseract[,x] <- readChar(ocrTrain[x], file.info(ocrTrain[x])$size)
   tesseract <- strsplit(tesseract,"\n")
   
   # plotting documents and see where lines differ in length
@@ -22,11 +20,10 @@ commonMistakes <- function(truthPath, OCRPath){
   # for(i in 1: length(files)) barplot(nchar(tesseract[[i]]) / nchar(groundTruth[[i]]))
   # dev.off()
   
-  a <- array(0, c(36, 36))
   possibilities <- c(0:9, letters)
+  confMat <- matrix(0, 36, 36, dimnames = list(possibilities, possibilities))
   
-  
-  for(i in 1:length(files)){
+  for(i in 1:length(truthTrain)){
     truthBag <- strsplit(groundTruth[[i]]," ")
     tessBag <- strsplit(tesseract[[i]]," ")
     for(j in 1 : min(length(truthBag), length(tessBag))){
@@ -39,9 +36,9 @@ commonMistakes <- function(truthPath, OCRPath){
             tessLetters <- unlist(strsplit(tessWords[k], ""))
             for(l in 1:length(truthLetters)){
               if(truthLetters[l] != tessLetters[l]){
-                a[match(tolower(truthLetters[l]), possibilities), 
+                confMat[match(tolower(truthLetters[l]), possibilities), 
                   match(tolower(tessLetters[l]), possibilities)] = 
-                  a[match(tolower(truthLetters[l]), possibilities), 
+                  confMat[match(tolower(truthLetters[l]), possibilities), 
                     match(tolower(tessLetters[l]), possibilities)] + 1
               }
             }
@@ -53,11 +50,9 @@ commonMistakes <- function(truthPath, OCRPath){
     }
   }
   
-  confMat <- a
-  rownames(confMat) <- colnames(confMat) <-  possibilities
-  
   save(confMat, file = "../output/confusionMatrix.RData")
-
+  return(confMat)
+  
 }
 
 # 

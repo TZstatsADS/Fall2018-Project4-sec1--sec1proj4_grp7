@@ -40,17 +40,14 @@ h4 { /* Header 4 */
 # Introduction {-}
 
 ```{r}
-library(stringr)
-library(tm)
-library(dplyr)
-library(tidytext)
-library(broom)
 
-# select training and testing data 80% and 20%
+# define what to run
 
 doDic = F # doDic=false means we can choose our own dictionary. It can be groundtruth or other online dictionary. 
 doDetect = F # same as above
 doDigram = F 
+doConfusion = F # compute confusion matrix
+
 ```
 
 
@@ -83,11 +80,18 @@ if (!require("pacman")) {
 pacman::p_load(knitr, readr, stringr, tesseract, vecsets)
 source('../lib/ifCleanToken.R')
 file_name_vec <- list.files("../data/ground_truth") #100 files in total
+
+library(stringr)
+library(tm)
+library(dplyr)
+library(tidytext)
+library(broom)
+
 ```
 
 # Step 2 - read the files and conduct Tesseract OCR
 
-Although we have processed the Tesseract OCR and save the output txt files in the `data` folder, we include this chunk of code in order to make clear the whole pipeline to you.
+Although we have processed the Tesseract OCR and save the output txt files in the `data` folder, we include this chunk of code to clarify the whole pipeline.
 
 ```{r, eval=FALSE}
 for(i in c(1:length(file_name_vec))){
@@ -106,6 +110,34 @@ for(i in c(1:length(file_name_vec))){
 ```
 
 # Step 3 - Error detection
+
+```{r}
+
+# read files 
+
+truthPath = "../data/ground_truth/"
+ocrPath = "../data/tesseract/"
+truthFiles <- list.files(path=truthPath, pattern="*.txt", full.names=TRUE, recursive=FALSE)
+ocrFiles <- list.files(path=ocrPath, pattern="*.txt", full.names=TRUE, recursive=FALSE)
+
+if(length(truthFiles) != length(ocrFiles)) stop("the number of ground truth files is not equal to the number of OCR recognized files")
+
+n <- length(truthFiles) # number of files
+
+# select train + validation and testing data 80% and 20%
+set.seed(1984)
+training <- sample(1:n, round(0.8*n))
+testing <- (1:n)[!1:n %in% training]
+
+truthTrain <- truthFiles[training]
+ocrTrain <- ocrFiles[training]
+truthTest <- truthFiles[testing]
+ocrTest <- ocrFiles[testing]
+
+
+```
+
+
 
 Now, we are ready to conduct post-processing, based on the Tessearct OCR output. First of all, we need to detect errors, or *incorrectly processed words* -- check to see if an input string is a valid dictionary word or if its n-grams are all legal.
 
@@ -179,36 +211,27 @@ detect(OCRtext, digrams)
 
 # Step 4 - Error correction
 
-Given the detected word error, in order to find the best correction, we need to generating the candidate corrections: a dictionary or a database of legal n-grams to locate one or more potential correction terms. Then we need invoke some lexical-similarity measure between the misspelled string and the candidates or a probabilistic estimate of the likelihood of the correction to rank order the candidates.
+Given the detected word error, in order to find the best correction, we need to generate the candidate corrections: a dictionary or a database of legal n-grams to locate one or more potential correction terms. Then we need invoke some lexical-similarity measure between the misspelled string and the candidates or a probabilistic estimate of the likelihood of the correction to rank order the candidates.
 
-The referenced papers are:
+The reference paper is on [topic models](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=4377099).
 
-1. [Letter n-gram](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1672564}{positional binary digram)
 
-- focus on section 3-b.error correction
-
-2. Supervised model -- [correction regressor](https://arxiv.org/pdf/1611.06950.pdf)
-
-3. [probability scoring without context](https://link.springer.com/content/pdf/10.1007%2FBF01889984.pdf)
-
-- focus on section 3
-
-4. [probability scoring with contextual constraints](https://link.springer.com/content/pdf/10.1007%2FBF01889984.pdf)
-
-- focus on section 5
-
-5. [topic models](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=4377099)
-
-Here, in our code, we just simply remove the detected-errors.
 ```{r correction}
 # the assigned paper for error correction is C5
 # step 1: train word from groundtruth with topic modeling, get the probability of each topic in each documents, probability of each word in each topic.
 # step 2: 
 # step 3:
-source("../lib/CandidateWords.R")
-source("../lib/LDA.R")
+# source("../lib/CandidateWords.R")
+# source("../lib/LDA.R")
+source("../lib/confusionMatrix.R")
 
-differCandidates(dict)
+
+if(doConfusion == T) confMat <- commonMistakes(truthTrain, ocrTrain) else load("../output/confusionMatrix.RData")
+
+
+
+
+# differCandidates(dict)
 
 ```
 
