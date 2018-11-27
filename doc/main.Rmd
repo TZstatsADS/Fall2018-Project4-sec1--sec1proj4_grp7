@@ -39,6 +39,21 @@ h4 { /* Header 4 */
 </style>
 # Introduction {-}
 
+```{r}
+library(stringr)
+library(tm)
+library(dplyr)
+library(tidytext)
+library(broom)
+
+# select training and testing data 80% and 20%
+
+doDic = F # doDic=false means we can choose our own dictionary. It can be groundtruth or other online dictionary. 
+doDetect = F # same as above
+doDigram = F 
+```
+
+
 Optical character recognition (OCR) is the process of converting scanned images of machine printed or
 handwritten text (numerals, letters, and symbols), into machine readable character streams, plain (e.g. text files) or formatted (e.g. HTML files). As shown in Figure 1, the data *workflow* in a typical OCR system consists of three major stages:
 
@@ -111,7 +126,7 @@ The referenced papers are:
 
 In this statercode, we implement the first three rules in the first paper -- rule based techniques, as an example.
 
-```{r}
+```{r, eval=FALSE}
 ### only process one of the files in the folder as an example, in your project, you need to use all the files
 current_file_name <- sub(".txt","",file_name_vec[5])
 
@@ -124,7 +139,42 @@ clean_tesseract_txt <- paste(current_tesseract_txt, collapse = " ")
 
 ## detect tesseract word error
 tesseract_vec <- str_split(clean_tesseract_txt," ")[[1]] #1124 tokens
-tesseract_if_clean <- unlist(lapply(tesseract_vec,ifCleanToken)) # source code of ifCleanToken in in lib folder
+tesseract_if_clean <- unlist(lapply(tesseract_vec,ifCleanToken)) # source code of ifCleanToken in lib folder
+```
+
+```{r detection}
+# the assigned paper for error detectoin is D2
+# step 1: create the dictionary from groudtruth
+# step 2: create the OCR word bag from tesseract
+# step 3: create the digram array 
+# step 4: implement detection part
+
+source("../lib/Dictionary.R")
+source("../lib/OCRText.R")
+source("../lib/Digrams.R")
+source("../lib/detect.R")
+
+
+if(doDic==T) {
+  dictionary("../data/ground_truth/")
+} else {
+  load("../output/dict.RData")
+}
+
+if(doDic==T){
+  OCRtext("../data/tesseract/")
+} else {
+  load("../output/OCRText.RData")
+}
+
+if(doDigram==T){
+  digram(dict)
+}else{
+  load("../output/digrams.RData")
+}
+
+detect(OCRtext, digrams)
+
 ```
 
 # Step 4 - Error correction
@@ -150,8 +200,16 @@ The referenced papers are:
 5. [topic models](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=4377099)
 
 Here, in our code, we just simply remove the detected-errors.
-```{r}
-tesseract_delete_error_vec <- tesseract_vec[tesseract_if_clean] #1095
+```{r correction}
+# the assigned paper for error correction is C5
+# step 1: train word from groundtruth with topic modeling, get the probability of each topic in each documents, probability of each word in each topic.
+# step 2: 
+# step 3:
+source("../lib/CandidateWords.R")
+source("../lib/LDA.R")
+
+differCandidates(dict)
+
 ```
 
 # Step 5 - Performance measure
@@ -172,11 +230,6 @@ ground_truth_vec <- str_split(paste(current_ground_truth_txt, collapse = " ")," 
 old_intersect_vec <- vecsets::vintersect(tolower(ground_truth_vec), tolower(tesseract_vec)) #607
 new_intersect_vec <- vecsets::vintersect(tolower(ground_truth_vec), tolower(tesseract_delete_error_vec)) #600
 
-ground_truth_vec_chr <- unlist(strsplit(gsub(pattern = " ","", ground_truth_vec),""))
-old_intersect_vec_chr <- vecsets::vintersect(tolower(ground_truth_vec_chr), tolower(tesseract_vec)) #607
-new_intersect_vec_chr <- vecsets::vintersect(tolower(ground_truth_vec_chr), tolower(tesseract_delete_error_vec)) #600
-
-
 OCR_performance_table <- data.frame("Tesseract" = rep(NA,4),
                                     "Tesseract_with_postprocessing" = rep(NA,4))
 row.names(OCR_performance_table) <- c("word_wise_recall","word_wise_precision",
@@ -185,24 +238,7 @@ OCR_performance_table["word_wise_recall","Tesseract"] <- length(old_intersect_ve
 OCR_performance_table["word_wise_precision","Tesseract"] <- length(old_intersect_vec)/length(tesseract_vec)
 OCR_performance_table["word_wise_recall","Tesseract_with_postprocessing"] <- length(new_intersect_vec)/length(ground_truth_vec)
 OCR_performance_table["word_wise_precision","Tesseract_with_postprocessing"] <- length(new_intersect_vec)/length(tesseract_delete_error_vec)
-OCR_performance_table["character_wise_recall","Tesseract"] <- length(old_intersect_vec_chr)/length(ground_truth_vec_chr)
-OCR_performance_table["character_wise_precision","Tesseract"] <- length(old_intersect_vec_chr)/length(tesseract_vec)
-OCR_performance_table["character_wise_recall","Tesseract_with_postprocessing"] <- length(new_intersect_vec_chr)/length(ground_truth_vec_chr)
-OCR_performance_table["character_wise_precision","Tesseract_with_postprocessing"] <- length(new_intersect_vec_chr)/length(tesseract_delete_error_vec)
-
 kable(OCR_performance_table, caption="Summary of OCR performance")
-
-
-# OCR_performance_table <- data.frame("Tesseract" = rep(NA,4),
-#                                     "Tesseract_with_postprocessing" = rep(NA,4))
-# row.names(OCR_performance_table) <- c("word_wise_recall","word_wise_precision",
-#                                                  "character_wise_recall","character_wise_precision")
-# OCR_performance_table["character_wise_recall","Tesseract"] <- length(old_intersect_vec_chr)/length(ground_truth_vec_chr)
-# OCR_performance_table["character_wise_precision","Tesseract"] <- length(old_intersect_vec_chr)/length(tesseract_vec)
-# OCR_performance_table["","Tesseract_with_postprocessing"] <- length(new_intersect_vec_chr)/length(ground_truth_vec_chr)
-# OCR_performance_table["character_wise_precision","Tesseract_with_postprocessing"] <- length(new_intersect_vec_chr)/length(tesseract_delete_error_vec)
-# kable(OCR_performance_table, caption="Summary of OCR performance")
-
 ```
 
 Besides the above required measurement, you are encouraged the explore more evaluation measurements. Here are some related references:
