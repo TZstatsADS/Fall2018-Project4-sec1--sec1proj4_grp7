@@ -4,63 +4,61 @@
 # library(tidytext)
 # library(broom)
 
-files <- list.files(path="../data/ground_truth/", pattern="*.txt", full.names=TRUE, recursive=FALSE)
-groundTruth <- array(NA, c(1, length(files)))
-for(x in 1:length(files)) groundTruth[,x] <- readChar(files[x], file.info(files[x])$size)
-groundTruth <- strsplit(groundTruth,"\n")
-
-
-files <- list.files(path="../data/tesseract/", pattern="*.txt", full.names=TRUE, recursive=FALSE)
-tesseract <- array(NA, c(1, length(files)))
-for(x in 1:length(files)) tesseract[,x] <- readChar(files[x], file.info(files[x])$size)
-tesseract <- strsplit(tesseract,"\n")
-
-pdf("plots.pdf", width=100, height=100)
-par(mfrow = c(10,10))
-for(i in 1: length(files)) barplot(nchar(tesseract[[i]]) / nchar(groundTruth[[i]]))
-dev.off()
-
-str(groundTruth[[1]][10])
-
-nWords <- function(input) sapply(strsplit(input, " "), length)
-
-strsplit(groundTruth, " ")
-
-
-a <- array(0, c(36, 36))
-possibilities <- c(0:9, letters)
-
-
-for(i in 1:length(files)){
-  truthBag <- strsplit(groundTruth[[i]]," ")
-  tessBag <- strsplit(tesseract[[i]]," ")
-  for(j in 1 : min(length(truthBag), length(tessBag))){
-    if(length(truthBag[[j]]) == length(tessBag[[j]])){
-      truthWords <- truthBag[[j]]
-      tessWords <- tessBag[[j]]
-      for(k in 1: length(truthWords)){
-        if((nchar(truthWords[k]) == nchar(tessWords[k]))){
-          truthLetters <- unlist(strsplit(truthWords[k], ""))
-          tessLetters <- unlist(strsplit(tessWords[k], ""))
-          for(l in 1:length(truthLetters)){
-            if(truthLetters[l] != tessLetters[l]){
-              a[match(tolower(truthLetters[l]), possibilities), 
-                match(tolower(tessLetters[l]), possibilities)] = 
+commonMistakes <- function(truthPath, OCRPath){
+  
+  files <- list.files(path="../data/ground_truth/", pattern="*.txt", full.names=TRUE, recursive=FALSE)
+  groundTruth <- array(NA, c(1, length(files)))
+  for(x in 1:length(files)) groundTruth[,x] <- readChar(files[x], file.info(files[x])$size)
+  groundTruth <- strsplit(groundTruth,"\n")
+  
+  files <- list.files(path="../data/tesseract/", pattern="*.txt", full.names=TRUE, recursive=FALSE)
+  tesseract <- array(NA, c(1, length(files)))
+  for(x in 1:length(files)) tesseract[,x] <- readChar(files[x], file.info(files[x])$size)
+  tesseract <- strsplit(tesseract,"\n")
+  
+  # plotting documents and see where lines differ in length
+  # pdf("plots.pdf", width=100, height=100)
+  # par(mfrow = c(10,10))
+  # for(i in 1: length(files)) barplot(nchar(tesseract[[i]]) / nchar(groundTruth[[i]]))
+  # dev.off()
+  
+  a <- array(0, c(36, 36))
+  possibilities <- c(0:9, letters)
+  
+  
+  for(i in 1:length(files)){
+    truthBag <- strsplit(groundTruth[[i]]," ")
+    tessBag <- strsplit(tesseract[[i]]," ")
+    for(j in 1 : min(length(truthBag), length(tessBag))){
+      if(length(truthBag[[j]]) == length(tessBag[[j]])){
+        truthWords <- truthBag[[j]]
+        tessWords <- tessBag[[j]]
+        for(k in 1: length(truthWords)){
+          if((nchar(truthWords[k]) == nchar(tessWords[k]))){
+            truthLetters <- unlist(strsplit(truthWords[k], ""))
+            tessLetters <- unlist(strsplit(tessWords[k], ""))
+            for(l in 1:length(truthLetters)){
+              if(truthLetters[l] != tessLetters[l]){
                 a[match(tolower(truthLetters[l]), possibilities), 
-                  match(tolower(tessLetters[l]), possibilities)] + 1
+                  match(tolower(tessLetters[l]), possibilities)] = 
+                  a[match(tolower(truthLetters[l]), possibilities), 
+                    match(tolower(tessLetters[l]), possibilities)] + 1
+              }
             }
+  
           }
-
         }
       }
+      
     }
-    
   }
+  
+  confMat <- a
+  rownames(confMat) <- colnames(confMat) <-  possibilities
+  
+  save(confMat, file = "../output/confusionMatrix.RData")
+
 }
-
-confMat <- a
-
-save(confMat, file = "../output/confusionMatrix.RData")
 
 # 
 # # tesseract <- ""
