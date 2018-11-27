@@ -4,7 +4,7 @@ library(tidytext)
 library(tidyverse)
 
 
-a  <- Corpus(DirSource("../data/ground_truth/"), readerControl = list(language="lat")) #specifies the exact folder where my text file(s) is for analysis with tm.
+a  <- Corpus(VectorSource(truthTrain), readerControl = list(language="lat")) #specifies the exact folder where my text file(s) is for analysis with tm.
 a <- tm_map(a, content_transformer(tolower))
 a <- tm_map(a , stripWhitespace)
 a <- tm_map(a, removeWords, sw)
@@ -26,7 +26,6 @@ ap_top_terms %>%
   geom_col(show.legend = FALSE) +
   facet_wrap(~ topic, scales = "free") +
   coord_flip()
-
 
 beta_spread <- ap_topics %>%
   mutate(topic = paste0("topic", topic)) %>%

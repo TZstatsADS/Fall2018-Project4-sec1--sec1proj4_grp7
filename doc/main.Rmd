@@ -47,6 +47,7 @@ doDic = F # doDic=false means we can choose our own dictionary. It can be ground
 doDetect = F # same as above
 doDigram = F 
 doConfusion = F # compute confusion matrix
+doLDA = F # compute topic modelling
 
 ```
 
@@ -86,6 +87,8 @@ library(tm)
 library(dplyr)
 library(tidytext)
 library(broom)
+library(topicmodels)
+library(ggplot2)
 
 ```
 
@@ -228,8 +231,10 @@ source("../lib/confusionMatrix.R")
 
 if(doConfusion == T) confMat <- commonMistakes(truthTrain, ocrTrain) else load("../output/confusionMatrix.RData")
 
+if(doLDA == T) l <- topicModelling(truthTrain) else load("../output/LDA.RData")
 
-
+wordTopic <- tidy(l, matrix = "beta")
+docTopic <- tidy(l, matrix = "gamma")
 
 # differCandidates(dict)
 

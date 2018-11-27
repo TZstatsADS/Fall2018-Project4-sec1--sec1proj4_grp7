@@ -1,9 +1,9 @@
 load("../output/dict.RData")
-load("../output/dict2.RData")
+load("../output/OCRText.RData")
 load("../output/digrams.RData")
 
 
-d2 <- dict2[nchar(dict2[,1]) < 16,]
+d2 <- OCRText[nchar(OCRText[,1]) < 16,]
 d2 <- d2[nchar(d2[,1]) > 1,] # no single character words
 
 
