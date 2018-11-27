@@ -12,7 +12,6 @@ library(broom)
 OCRText <- function(ocrTrain){
   
   tesseract <- ""
-  
   for(x in ocrTrain) tesseract <- paste(tesseract, readChar(x, file.info(x)$size))
   
   tesseract <- strsplit(tesseract,"\n")[[1]]
@@ -33,11 +32,10 @@ OCRText <- function(ocrTrain){
     unnest_tokens(dictionary, text)
   
   dict2 <- as.matrix(dict2)
-  dict2 <- cbind(dict2, rep(0, nrow(dict2)))
-  colnames(dict2) <- c("word", "error")
+  OCRText <- cbind(dict2, rep(0, nrow(dict2)))
+  colnames(OCRText) <- c("word", "error")
   
-  save(dict2, file = "../output/dict2.RData")
-  
+  save(OCRText, file = "../output/OCRText.RData")
 }
 
 

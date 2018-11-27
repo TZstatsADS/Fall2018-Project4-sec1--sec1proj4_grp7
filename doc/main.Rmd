@@ -43,11 +43,10 @@ h4 { /* Header 4 */
 
 # define what to run
 
-doDic = F # doDic=false means we can choose our own dictionary. It can be groundtruth or other online dictionary. 
-doDetect = F # same as above
-doDigram = F 
+doDic = F # dictionary for groundtruth
+doDetect = F # detection part
+doDigram = F # digram array for groundtruth
 doConfusion = F # compute confusion matrix
-
 ```
 
 
