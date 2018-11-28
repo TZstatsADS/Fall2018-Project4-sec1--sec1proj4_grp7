@@ -1,17 +1,20 @@
 ---
-title: 'Optical character recognition (OCR)'
-output: 
+title: "Optical character recognition (OCR)"
+output:
   html_document:
-    toc: true
+    code_folding: hide
+    number_sections: yes
+    toc: yes
     toc_depth: 2
     toc_float:
-      collapsed: false
-      smooth_scroll: false
-    number_sections: true
-    code_folding: hide
+      collapsed: no
+      smooth_scroll: no
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
 ---
 
-Jing Wu
+Gabriel, Yadir, Xiaojie, Mingyu
 
 GU4243/GR5243: Applied Data Science
 
@@ -39,18 +42,39 @@ h4 { /* Header 4 */
 </style>
 # Introduction {-}
 
-```{r}
+```{r global options, include = FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+
+
+```{r, echo = F}
 # define what to run
+
+#detection
 
 doDic = F # dictionary for groundtruth
 doOCRText = F # words table for training OCRText
-doDetect = F # detection part
+doOCRWordsTable = F # words table for testing
 doDigram = F # digram array for groundtruth
+doDetect = F # detection part
+
+# topic modelling
+
 doConfusion = F # compute confusion matrix
 doLDA = F # compute topic modelling
-doTruthWordsTable = F # words table for performance
-doOCRWordsTable = F # words table for performance
 
+# correction
+
+doCorrect = F
+
+# performance
+
+doTruthWordsTable = F # truth test words table 
+doOCRWordsTable = F # tesseract test words table
+doCorrectWordsTable = F # processed test words table
+
+doPerfTess = F
+doPerfTessProcess = F
 
 ```
 
@@ -68,11 +92,9 @@ handwritten text (numerals, letters, and symbols), into machine readable charact
 
 We have processed raw scanned images through the first two steps are relying on the [Tessearct OCR machine](https://en.wikipedia.org/wiki/Tesseract_(software)). R package tutorial can be found [here](https://www.r-bloggers.com/the-new-tesseract-package-high-quality-ocr-in-r/). 
 
-BUT this is not the FOCUS of this project!!!
-
 In this project, we are going to **focus on the third stage -- post-processing**, which includes two tasks: *error detection* and *error correction*.  
 
-# Step 1 - Load library and source code
+# Load library and source code
 ```{r, warning=FALSE, message = FALSE}
 if (!require("devtools")) install.packages("devtools")
 if (!require("pacman")) {
@@ -98,7 +120,7 @@ library(reshape2)
 
 ```
 
-# Step 2 - read the files and conduct Tesseract OCR
+# Read the files and conduct Tesseract OCR
 
 Although we have processed the Tesseract OCR and save the output txt files in the `data` folder, we include this chunk of code to clarify the whole pipeline.
 
@@ -117,9 +139,12 @@ for(i in c(1:length(file_name_vec))){
 }
 ```
 
-# Step 3 - Error detection
+# Error detection
 
-### 3.1 - Data Preparation
+## Data Preparation
+
+The 100 documents are randomly split into a training (80) and a testing (20) group.
+
 ```{r}
 # read files 
 
@@ -149,10 +174,10 @@ ocrTest <- ocrFiles[testing]
 ```
 
 
-Now, we are ready to conduct post-processing, based on the Tessearct OCR output. First of all, we need to detect errors, or *incorrectly processed words* -- check to see if an input string is a valid dictionary word or if its n-grams are all legal.
+Now, we are ready to conduct post-processing, based on the Tessearct OCR output. First of all, we need to detect errors, or *incorrectly processed words*. Following Riseman et. al. (1974), we implement a method involving n-grams: a dictionary diagram indicating possible letter combinations for each word lengths is computed from a dictionary. For the purpose of this, the groundTruth is used to create the dictionary.
 
 
-### 3.2 - Source the files
+## Source the files
 ```{r detection}
 
 source("../lib/Dictionary.R") # dictionary for groundtruth dataset
@@ -163,7 +188,7 @@ source("../lib/wordsTable.R") # function to locate the words' position in which 
 
 ```
 
-### 3.3 - Create bag of words and digram array for groungtruth and tesseract data
+## Create bag of words and digram array for groungtruth and tesseract data
 
 * step 1: Create the dictionary from 100 groudtruth files | ("dict") 
 * step 2: Create the list of incorrect words from tesseract OCR train dataset | ("OCRtext") and give the position of word in which line and which document
@@ -195,7 +220,7 @@ if(doDigram == T){
 }
 ```
 
-### 3.4 - Implement detection algorithm
+## Implement detection algorithm
 
 * step 0: Get list of words from OCR Train dataset, it only includes the words that length is less than 25 
 * step 1: Detect the OCR test dataset, if there is an error, label the word with 1
@@ -204,7 +229,7 @@ if(doDigram == T){
 # OCRText is the bag of word derived from function in OCRText.R which using OCRTrain data
 # OCRTestTable <- OCRTestTable[nchar(OCRTestTable[,1]) < 25,]
 
-if(detect){
+if(doDetect){
   OCRTestErrors <- detect(OCRTestTable, digram)
   save(OCRTestErrors,file="../output/OCRTestErrors.RData")
 } else {
@@ -212,13 +237,13 @@ if(detect){
 }
 ```
 
-# Step 4 - Error correction
+# Error correction
 
 Given the detected word error, in order to find the best correction, we need to generate the candidate corrections: a dictionary or a database of legal n-grams to locate one or more potential correction terms. Then we need invoke some lexical-similarity measure between the misspelled string and the candidates or a probabilistic estimate of the likelihood of the correction to rank order the candidates.
 
 The reference paper (C5) is on [topic models](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=4377099).
 
-### 4.1 - Data Preparation
+## Data Preparation
 ```{r}
 source("../lib/confusionMatrix.R")
 source('../lib/outputtext.R')
@@ -227,9 +252,8 @@ source('../lib/outputtext.R')
 
 
 
-### 4.2 Implementation correction algorithm
+## Implementation correction algorithm
 
-* step 0: 
 * step 1: Train the LDA topic model using groundtruth training dataset("truthTrain")
 * step 2: $\ P(t_k)$ Get probability of topics in each document
 * step 3: $\ P(w|t_k)$ Get probability  probability of words in the given topic
@@ -239,11 +263,11 @@ source('../lib/outputtext.R')
 # step 1: train word from groundtruth with topic modeling, get the probability of each topic in each documents, probability of each word in each topic.
 
 
-if(doConfusion == T) confMat <- commonMistakes(truthTrain, ocrTrain) else load("../output/confusionMatrix.RData")
+if(doConfusion) confMat <- commonMistakes(truthTrain, ocrTrain) else load("../output/confusionMatrix.RData")
 
-if(doLDA == T) l <- topicModelling(truthTrain) else load("../output/LDA.RData") # here we choose #oftopic=30
+if(doLDA) l <- topicModelling(truthTrain) else load("../output/LDA.RData") # here we choose #oftopic=30
 
-if(doCorrect == T){
+if(doCorrect){
   wordTopic <- tidy(l, matrix = "beta")
   docTopic <- tidy(l, matrix = "gamma")
   wordTopic <- acast(wordTopic, term~topic, value.var="beta")
@@ -295,25 +319,8 @@ Both *precision* and *recall* are mathematically convenient measures because the
 
 Here, we only finished the **word level evaluation** criterions, you are required to complete the **letter-level** part.
 
+## Word-level Precision
 
-```{r, eval=FALSE}
-
-file_name_vec <- list.files("../data/ground_truth") #100 files in total
-### only process one of the files in the folder as an example, in your project, you need to use all the files
-current_file_name <- sub(".txt","",file_name_vec[5])
-
-## read the ground truth text
-current_ground_truth_txt <- readLines(paste("../data/ground_truth/",current_file_name,".txt",sep=""), warn=FALSE)
-
-## read the tesseract text
-current_tesseract_txt <- readLines(paste("../data/tesseract/",current_file_name,".txt",sep=""), warn=FALSE)
-correct_tesseract_txt <- readLines(paste("../output/correct/",current_file_name,".txt",sep=""), warn=FALSE)
-clean_tesseract_txt <- paste(current_tesseract_txt, collapse = " ")
-
-## detect tesseract word error
-tesseract_vec <- strsplit(clean_tesseract_txt," ")[[1]] #1124 tokens
-tesseract_if_clean <- unlist(lapply(tesseract_vec,ifCleanToken)) # source code of ifCleanToken in lib folder
-```
 
 ```{r}
 
@@ -355,16 +362,15 @@ densitiesPrecRecall <- ggplot(precRecall, aes(x = precision, y = test)) +
   geom_density_ridges() + scale_x_continuous(limits = c(0, 1)) +
   theme_minimal()
 
-ggplot(precRecall, aes(x = precision, y = test)) + 
-  geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01, gradient_lwd = 1.) + scale_x_continuous(limits = c(0, 1)) +
-  theme_minimal()
-
-
 ggsave(filename="../output/precRecall.pdf", plot=densitiesPrecRecall)
+
+densitiesPrecRecall
 
 ```
 
-## Characterwise Precision
+## Character-level Precision
+
+We matched words of the same length within lines of the same length in the order of appearance in the tesseract, processed, and groundtruth files. This was not a guaranty for accurately matching words: the peek around zero for the processed data points to this issue.
 
 ```{r}
 
@@ -378,17 +384,17 @@ library(ggplot2)
 precisions <- cbind(c(precisionTess, precision), 
                 c(rep("tesseract", length(precisionTess)),
                   rep("processed", length(precision))))
-head(precisions)
+
 precisions <- as.data.frame(precisions)
 names(precisions) <- c("precision", "text")
-
-mean(precisionTess, na.rm = T)
 
 precisions$precision <- as.numeric(levels(precisions$precision)[precisions$precision])
 
 densities <- ggplot(precisions, aes(x = precision, y = text)) + 
   geom_density_ridges() + scale_x_continuous(limits = c(0, 1)) +
   theme_minimal()
+
+densities
 
 ggsave(filename="../output/densities.pdf", plot=densities)
 
@@ -397,11 +403,15 @@ ggsave(filename="../output/densities.pdf", plot=densities)
 
 
 
-
 # References {-}
 
-1. Borovikov, E. (2014). *A survey of modern optical character recognition techniques*. arXiv preprint arXiv:1412.4183.[pdf](https://pdfs.semanticscholar.org/79c9/cc90b8c2e2c9c54c3862935ea00df7dd56ed.pdf)
+1. Riseman, E. M., & Hanson, A. R. (1974). A contextual postprocessing system for error correction using binary n-grams. IEEE Transactions on Computers, 100(5), 480-493. [Link](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1672564&tag=1)
+
+2. Wick, M., Ross, M., & Learned-Miller, E. (2007, September). Context-sensitive error correction: Using topic models to improve OCR. In Document Analysis and Recognition, 2007. ICDAR 2007. Ninth International Conference on (Vol. 2, pp. 1168-1172). IEEE. [Link](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=4377099)
+
+
+3. Borovikov, E. (2014). *A survey of modern optical character recognition techniques*. arXiv preprint arXiv:1412.4183.[pdf](https://pdfs.semanticscholar.org/79c9/cc90b8c2e2c9c54c3862935ea00df7dd56ed.pdf)
 (This paper is the source of our evaluation criterion)
 
-2. Kukich, K. (1992). *Techniques for automatically correcting words in text*. Acm Computing Surveys (CSUR), 24(4), 377-439. [pdf](http://www.unige.ch/eti/ptt/docs/kukich-92.pdf)
+4. Kukich, K. (1992). *Techniques for automatically correcting words in text*. Acm Computing Surveys (CSUR), 24(4), 377-439. [pdf](http://www.unige.ch/eti/ptt/docs/kukich-92.pdf)
 (This paper is the benchmark review paper)

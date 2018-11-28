@@ -1,4 +1,3 @@
-load(file = "../output/dict.RData")
 
 # This file includes a function that generates a list of words that differ by zero, one, or two characters from a given word
 

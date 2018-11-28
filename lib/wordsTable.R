@@ -1,14 +1,3 @@
-#library(hunspell)
-#Sys.setenv(DICPATH = "/my/custom/hunspell/dir")
-#hunspell:::dicpath()
-
-library(stringr)
-library(tm)
-library(dplyr)
-library(tidytext)
-library(broom)
-
-
 wordsTable <- function(fileNames, outName){
   
   # check how many words tesseract has
@@ -63,7 +52,3 @@ wordsTable <- function(fileNames, outName){
   save(list=outName, file = paste0("../output/", outName, ".RData"))
   return(eval(as.name(paste(outName))))
 }
-
-wordsTable(ocrTrain, "ocrTrainTable")
-
-

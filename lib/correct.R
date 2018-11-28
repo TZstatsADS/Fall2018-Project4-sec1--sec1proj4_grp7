@@ -1,25 +1,3 @@
-
-source("../lib/LDA.R")
-
-
-
-load(file = "../output/LDA.RData")
-load(file="../output/OCRTestTable.RData")
-load("../output/OCRTestTable.RData")
-
-# load(file="../output/wordTopic.RData")
-# load(file="../output/docTopic.RData")
-OCRTestErrors <- detect(OCRTestTable, digram)
-
-save(OCRTestErrors,file="../output/OCRTestErrors.RData")
-
-
-
-
-
-library(profvis)
-
-
 correct <- function(OCRTestErrors, docTopic, wordTopic){
   
   source("../lib/differ.R")
@@ -76,9 +54,6 @@ correct <- function(OCRTestErrors, docTopic, wordTopic){
   save(OCRCorrectTable,file = "../output/OCRCorrectTable.RData")
   return(OCRCorrectTable)
 }
-
-
-write.csv(head(cbind(OCRCorrectTable[OCRCorrectTable[,5] == 1,1], OCRTestTable[OCRTestTable[,5] == 1,1]), 50), file = "../output/compare50.csv")
 
 
 

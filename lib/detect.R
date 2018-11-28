@@ -1,7 +1,3 @@
-load("../output/dict.RData")
-load("../output/OCRText.RData")
-load("../output/digrams.RData")
-
 
 #d2 <- OCRText[nchar(OCRText[,1]) < 25,]
 
@@ -37,7 +33,7 @@ detect <- function(d2, digram){
     }
   }
   
-  table(as.numeric(d2[,5]))
+  # table(as.numeric(d2[,5]))
   ocrerror <- d2
   return(ocrerror)
   save(ocrerror,file = "../output/ocrerror.RData")
