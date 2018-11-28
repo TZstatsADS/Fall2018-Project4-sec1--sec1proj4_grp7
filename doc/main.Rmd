@@ -249,7 +249,6 @@ source('../lib/outputtext.R')
 ```
 
 
-
 ### 4.2 Implementation correction algorithm
 
 * step 0: 
