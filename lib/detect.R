@@ -20,7 +20,7 @@ detect <- function(d2, digram){
           if(k < l){
             # cat(i, " ", k, " ", l)
             if(digram[n, counter, match(substr(d2[i,1], k, k), numberletters), 
-                match(substr(d2[i,1], l, l), letters)] == 0){
+                match(substr(d2[i,1], l, l), numberletters)] == 0){
               d2[i,5] <- 1
               stop = TRUE
               break
