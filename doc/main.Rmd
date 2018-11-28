@@ -150,23 +150,13 @@ ocrTest <- ocrFiles[testing]
 ```
 
 
-
 Now, we are ready to conduct post-processing, based on the Tessearct OCR output. First of all, we need to detect errors, or *incorrectly processed words* -- check to see if an input string is a valid dictionary word or if its n-grams are all legal.
 
-The referenced papers are:
+The referenced paper is:
 
-1. [Rule-based techniques](http://webpages.ursinus.edu/akontostathis/KulpKontostathisFinal.pdf)
-
-- rules are in the section 2.2 
-
-2. [Letter n-gram](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1672564)
+D2. [Letter n-gram](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1672564)
 
 - focus on positional binary digram in section 3-a.error detection
-
-3. Probabilistic techniques -- [SVM garbage detection](https://dl.acm.org/citation.cfm?doid=2034617.2034626)
-
-- features are in section 5 (you can choose not to implement ‘Levenshtein distance’ feature)
-
 
 In this statercode, we implement the first three rules in the first paper -- rule based techniques, as an example.
 
@@ -188,7 +178,7 @@ tesseract_if_clean <- unlist(lapply(tesseract_vec,ifCleanToken)) # source code o
 
 ### 3.2 - Source the files
 ```{r detection}
-# the assigned paper for error detectoin is D2
+
 # step 1: create the dictionary from groudtruth
 # step 2: create the OCR word bag from tesseract
 # step 3: create the digram array 
@@ -203,9 +193,9 @@ source("../lib/wordsTable.R") # function to locate the words' position in which 
 
 ### 3.3 - Create bag of words and digram array for groungtruth and tesseract data
 
-* step 1: Create the dictionary from groudtruth dataset
-* step 2: Create the OCR bag of word from tesseract dataset
-* step 3: Create the digram array including all length of words from groundtruth dataset
+* step 1: Create the dictionary from 100 groudtruth files ("dict") 
+* step 2: Create the list of incorrect words from tesseract OCR train dataset ("OCRtext")
+* step 3: Create the digram array(36*36) including numbers(0-9) and letters(a-z), from all length of words in 100 groundtruth files ("digram")
 
 ```{r}
 # For our dictionary (derived from groundtruth), we use all 100 documents instead of training dataset from groundtruth because we want to get a large dictionary. If we only use training dataset (80 documents), the dictionary is too small to include most of words.
