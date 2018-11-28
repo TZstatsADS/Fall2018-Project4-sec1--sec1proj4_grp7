@@ -83,7 +83,7 @@ if (!require("pacman")) {
 
 if (!require("textreg")) install.packages("textreg")
 
-pacman::p_load(knitr, readr, stringr, tesseract, vecsets)
+#pacman::p_load(knitr, readr, stringr, tesseract, vecsets)
 
 library(stringr)
 library(tm)
@@ -114,7 +114,6 @@ for(i in c(1:length(file_name_vec))){
   
   ### save tesseract text file
   writeLines(clean_tesseract_txt, paste("../data/tesseract/",current_file_name,".txt",sep=""))
-  
 }
 ```
 
@@ -138,9 +137,11 @@ set.seed(1984)
 training <- sample(1:n, round(0.8*n))
 testing <- (1:n)[!1:n %in% training]
 
+# set training data
 truthTrain <- truthFiles[training]
 ocrTrain <- ocrFiles[training]
 
+# set testing data
 truthTest <- truthFiles[testing]
 ocrTest <- ocrFiles[testing]
 ```
@@ -190,18 +191,18 @@ tesseract_if_clean <- unlist(lapply(tesseract_vec,ifCleanToken)) # source code o
 # step 3: create the digram array 
 # step 4: implement detection part
 
-source("../lib/Dictionary.R")
-source("../lib/OCRText.R")
-source("../lib/Digram.R")
-source("../lib/detect.R")
-source("../lib/wordsTable.R")
+source("../lib/Dictionary.R") # dictionary for groundtruth dataset
+source("../lib/OCRText.R")    # bag of word of tesseract ocr text
+source("../lib/Digram.R")     # digram for all words in groundtruth 
+source("../lib/detect.R")     # detection function
+source("../lib/wordsTable.R") # function to locate the words' position in which line and document 
 ```
 
 ### 3.3 - Create bag of words and digram array for groungtruth and tesseract data
 
-* Create the dictionary from groudtruth dataset
-* Create the OCR bag of word from tesseract dataset
-* Create the digram array including all length of words from groundtruth dataset
+* step 1: Create the dictionary from groudtruth dataset
+* step 2: Create the OCR bag of word from tesseract dataset
+* step 3: Create the digram array including all length of words from groundtruth dataset
 
 ```{r}
 # For our dictionary (derived from groundtruth), we use all 100 documents instead of training dataset from groundtruth because we want to get a large dictionary. If we only use training dataset (80 documents), the dictionary is too small to include most of words.
@@ -212,6 +213,7 @@ if(doDic == T) {
   load("../output/dict.RData")
 }
 
+# give the position for word in OCR trainingtext
 if(doOCRText == T) OCRtext <- wordsTable(ocrTrain, "ocrTrainTable") else load("../output/ocrTrainTable.RData")
 
 # if(doDic == T){
@@ -220,6 +222,7 @@ if(doOCRText == T) OCRtext <- wordsTable(ocrTrain, "ocrTrainTable") else load(".
 #   load("../output/OCRText.RData")
 # }
 
+# create the digram for all words in dictionary of groundtruth
 if(doDigram == T){
   digram <- digram(dict)
 }else{
@@ -229,8 +232,10 @@ if(doDigram == T){
 
 ### 3.4 - Implement detection algorithm
 ```{r}
-OCRtext <- OCRtext[nchar(OCRtext[,1]) < 25,]
-detect(OCRtext, digram)
+# detect the OCR train 
+# OCRText is the bag of word derived from function in OCRText.R which using OCRTrain data
+OCRText <- OCRText[nchar(OCRText[,1]) < 25,]
+detectResult <- detect(OCRText, digram)
 ```
 
 # Step 4 - Error correction
@@ -239,12 +244,18 @@ Given the detected word error, in order to find the best correction, we need to 
 
 The reference paper is on [topic models](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=4377099).
 
+### 4.1 - Data Preparation
+
+* step 1: Train the LDA topic model using groundtruth training dataset
+* step 2: Get probability of topic for recognized the word in the dictionary 
+* step 3: 
 
 ```{r correction}
 # the assigned paper for error correction is C5
 # step 1: train word from groundtruth with topic modeling, get the probability of each topic in each documents, probability of each word in each topic.
 # step 2: 
 # step 3:
+
 # source("../lib/CandidateWords.R")
 # source("../lib/LDA.R")
 source("../lib/confusionMatrix.R")
