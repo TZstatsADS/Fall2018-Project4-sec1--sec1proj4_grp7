@@ -40,7 +40,6 @@ h4 { /* Header 4 */
 # Introduction {-}
 
 ```{r}
-
 # define what to run
 
 doDic = F # dictionary for groundtruth
@@ -185,7 +184,7 @@ tesseract_if_clean <- unlist(lapply(tesseract_vec,ifCleanToken)) # source code o
 
 source("../lib/Dictionary.R")
 source("../lib/OCRText.R")
-source("../lib/Digrams.R")
+source("../lib/digrams.R")
 source("../lib/detect.R")
 ```
 
@@ -211,7 +210,7 @@ if(doDic == T){
 }
 
 if(doDigram == T){
-  digrams <- digram(dict)
+  digram <- digram(dict)
 }else{
   load("../output/digrams.RData")
 }
