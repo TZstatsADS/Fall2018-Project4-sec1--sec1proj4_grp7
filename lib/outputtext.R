@@ -11,10 +11,10 @@ outputtext <- function(ocrcorrect){
     data <- c()
     
     for (line in 1:nline){
-      datarow <- paste(paste(ocrcorrect[docnumber == doc & linenumber == line,1], collapse = ""))
+      datarow <- paste(paste(ocrcorrect[docnumber == doc & linenumber == line,1], collapse = " "))
       data <- c(data, datarow)
     }
-  write.table(data, file = paste("../output/correct/ocrcorrect", doc,".txt"),
+  write.table(data, file = paste0("../output/correct/ocrcorrect", doc,".txt"),
               sep = "", row.names = FALSE, col.names = FALSE)
-}
+  }
 }
