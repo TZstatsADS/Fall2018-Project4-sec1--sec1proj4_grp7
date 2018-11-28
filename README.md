@@ -11,8 +11,7 @@ Term: Fall 2018
 	+ Gabriel Benedict
 	+ Xiaojie Wei
 	+ Mingyu Yang
-	+ team member 4
-	+ team member 5
+	
 
 + Project summary: In this project, we will create an OCR post-processing procedure to enhance Tesseract OCR output. 
 	
