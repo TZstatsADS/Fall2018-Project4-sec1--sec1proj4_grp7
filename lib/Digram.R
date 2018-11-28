@@ -7,7 +7,7 @@ digram <- function(d){
   # d <- dict[nchar(dict) < 21]
   
   N <- max(nchar(d))
-  digram <- array(0, c(N, (N-1)*N/2, 26, 26))
+  digram <- array(0, c(N, (N-1)*N/2, 36, 36))
   numberletters <- c(0:9, letters)
   
   for(i in d){
