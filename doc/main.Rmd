@@ -225,9 +225,11 @@ if(doDigram == T){
 ```{r}
 # OCRText is the bag of word derived from function in OCRText.R which using OCRTrain data
 # OCRTestTable <- OCRTestTable[nchar(OCRTestTable[,1]) < 25,]
-OCRTestErrors <- detect(OCRTestTable, digram)
 
-save(OCRTestErrors,file="../output/OCRTestErrors.RData")
+if(detect){
+  OCRTestErrors <- detect(OCRTestTable, digram)
+  save(OCRTestErrors,file="../output/OCRTestErrors.RData")
+} else {load("../output/OCRTestErrors.RData")}
 ```
 
 # Step 4 - Error correction
@@ -288,11 +290,6 @@ if(doOCRWordsTable) OCRTestTable <- wordsTable(ocrTest, "OCRTestTable") else loa
 correctTest <- list.files(path=correctPath, pattern="*.txt", full.names=TRUE, recursive=FALSE)
 if(doCorrectWordsTable) correctTestTable <- wordsTable(correctTest, "correctTestTable") else load("../output/correctTestTable.RData")
 
-if(doPerfTess) precisionTess <- performance(truthTestTable, OCRTestTable, "precisionTess") else load("../output/precisionTess.RData")
-  
-if(doPerfTessProcess) precisionProcessed <- performance(truthTestTable, correctTestTable, "precisionProcessed") else load("../output/precisionProcessed.RData")
-
-
 first50 <- cbind(head(truthTestTable[(nchar(OCRTestTable[,1]) > 1)[1:100] , 1], 50),
                   head(OCRTestTable[(nchar(OCRTestTable[,1]) > 1)[1:100],1], 50),
                   head(correctTestTable[,1], 50))
@@ -336,19 +333,37 @@ OCR_performance_table["word_wise_precision","Tesseract_with_postprocessing"] <- 
 kable(OCR_performance_table, caption="Summary of OCR performance")
 ```
 
-Besides the above required measurement, you are encouraged the explore more evaluation measurements. Here are some related references:
+## Characterwise Precision
 
-1. Karpinski, R., Lohani, D., & Belaïd, A. *Metrics for Complete Evaluation of OCR Performance*. [pdf](https://csce.ucmss.com/cr/books/2018/LFS/CSREA2018/IPC3481.pdf)
+```{r}
 
-- section 2.1 Text-to-Text evaluation
+if(doPerfTess) precisionTess <- performance(truthTestTable, OCRTestTable, "precisionTess") else load("../output/precisionTess.RData")
+  
+if(doPerfTessProcess) precisionProcessed <- performance(truthTestTable, correctTestTable, "precisionProcessed") else load("../output/precisionProcessed.RData")
 
-2. Mei, J., Islam, A., Wu, Y., Moh'd, A., & Milios, E. E. (2016). *Statistical learning for OCR text correction*. arXiv preprint arXiv:1611.06950. [pdf](https://arxiv.org/pdf/1611.06950.pdf)
+library(ggridges)
+library(ggplot2)
 
-- section 5, separate the error detection and correction criterions
+precisions <- cbind(c(precisionTess, precision), 
+                c(rep("tesseract", length(precisionTess)),
+                  rep("processed", length(precision))))
+head(precisions)
+precisions <- as.data.frame(precisions)
+names(precisions) <- c("precision", "text")
 
-3. Belaid, A., & Pierron, L. (2001, December). *Generic approach for OCR performance evaluation*. In Document Recognition and Retrieval IX (Vol. 4670, pp. 203-216). International Society for Optics and Photonics. [pdf](https://members.loria.fr/ABelaid/publis/spie02-belaid-pierron.pdf)
+precisions$precision <- as.numeric(levels(precisions$precision)[precisions$precision])
 
-- section 3.2, consider the text alignment
+densities <- ggplot(precisions, aes(x = precision, y = text)) + 
+  geom_density_ridges() + scale_x_continuous(limits = c(0, 1)) +
+  theme_minimal()
+
+ggsave(filename="../output/densities.pdf", plot=densities)
+
+```
+
+
+
+
 
 # References {-}
 
