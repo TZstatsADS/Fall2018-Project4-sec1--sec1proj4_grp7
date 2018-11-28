@@ -1,7 +1,7 @@
 load("../output/dict.RData")
 
 
-digram <- function(d){
+Digram <- function(d){
   # d = dictionary
   
   # d <- dict[nchar(dict) < 21]

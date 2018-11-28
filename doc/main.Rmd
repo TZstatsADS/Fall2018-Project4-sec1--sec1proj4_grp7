@@ -92,6 +92,7 @@ library(tidytext)
 # library(broom)
 library(topicmodels)
 library(ggplot2)
+library(reshape2)
 
 source('../lib/ifCleanToken.R')
 file_name_vec <- list.files("../data/ground_truth") #100 files in total
@@ -125,6 +126,8 @@ for(i in c(1:length(file_name_vec))){
 
 truthPath = "../data/ground_truth/"
 ocrPath = "../data/tesseract/"
+correctPath = "../output/correct/"
+
 truthFiles <- list.files(path=truthPath, pattern="*.txt", full.names=TRUE, recursive=FALSE)
 ocrFiles <- list.files(path=ocrPath, pattern="*.txt", full.names=TRUE, recursive=FALSE)
 
@@ -147,23 +150,11 @@ ocrTest <- ocrFiles[testing]
 ```
 
 
-
 Now, we are ready to conduct post-processing, based on the Tessearct OCR output. First of all, we need to detect errors, or *incorrectly processed words* -- check to see if an input string is a valid dictionary word or if its n-grams are all legal.
 
-The referenced papers are:
-
-1. [Rule-based techniques](http://webpages.ursinus.edu/akontostathis/KulpKontostathisFinal.pdf)
-
-- rules are in the section 2.2 
-
-2. [Letter n-gram](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1672564)
+The referenced paper (D2) is:[Letter n-gram](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1672564)
 
 - focus on positional binary digram in section 3-a.error detection
-
-3. Probabilistic techniques -- [SVM garbage detection](https://dl.acm.org/citation.cfm?doid=2034617.2034626)
-
-- features are in section 5 (you can choose not to implement ‘Levenshtein distance’ feature)
-
 
 In this statercode, we implement the first three rules in the first paper -- rule based techniques, as an example.
 
@@ -185,24 +176,20 @@ tesseract_if_clean <- unlist(lapply(tesseract_vec,ifCleanToken)) # source code o
 
 ### 3.2 - Source the files
 ```{r detection}
-# the assigned paper for error detectoin is D2
-# step 1: create the dictionary from groudtruth
-# step 2: create the OCR word bag from tesseract
-# step 3: create the digram array 
-# step 4: implement detection part
 
 source("../lib/Dictionary.R") # dictionary for groundtruth dataset
 source("../lib/OCRText.R")    # bag of word of tesseract ocr text
 source("../lib/Digram.R")     # digram for all words in groundtruth 
 source("../lib/detect.R")     # detection function
 source("../lib/wordsTable.R") # function to locate the words' position in which line and document 
+
 ```
 
 ### 3.3 - Create bag of words and digram array for groungtruth and tesseract data
 
-* step 1: Create the dictionary from groudtruth dataset
-* step 2: Create the OCR bag of word from tesseract dataset
-* step 3: Create the digram array including all length of words from groundtruth dataset
+* step 1: Create the dictionary from 100 groudtruth files | ("dict") 
+* step 2: Create the list of incorrect words from tesseract OCR train dataset | ("OCRtext") and give the position of word in which line and which document
+* step 3: Create the digram array(36*36) including numbers(0-9) and letters(a-z), from all length of words in 100 groundtruth files | ("digram")
 
 ```{r}
 # For our dictionary (derived from groundtruth), we use all 100 documents instead of training dataset from groundtruth because we want to get a large dictionary. If we only use training dataset (80 documents), the dictionary is too small to include most of words.
@@ -214,7 +201,11 @@ if(doDic == T) {
 }
 
 # give the position for word in OCR trainingtext
-if(doOCRText == T) OCRtext <- wordsTable(ocrTrain, "ocrTrainTable") else load("../output/ocrTrainTable.RData")
+if(doOCRText == T){
+  OCRText <- wordsTable(ocrTrain, "ocrTrainTable")
+} else{
+  load("../output/ocrTrainTable.RData")
+}
 
 # if(doDic == T){
 #   OCRText <- OCRtext("../data/tesseract/")
@@ -224,50 +215,60 @@ if(doOCRText == T) OCRtext <- wordsTable(ocrTrain, "ocrTrainTable") else load(".
 
 # create the digram for all words in dictionary of groundtruth
 if(doDigram == T){
-  digram <- digram(dict)
+  digram <- Digram(dict)
 }else{
   load("../output/digrams.RData")
 }
 ```
 
 ### 3.4 - Implement detection algorithm
+
+* step 0: Get list of words from OCR Train dataset, it only includes the words that length is less than 25 
+* step 1: Detect the OCR train dataset, if there is an error, label the word with 1
+
 ```{r}
-# detect the OCR train 
 # OCRText is the bag of word derived from function in OCRText.R which using OCRTrain data
 OCRText <- OCRText[nchar(OCRText[,1]) < 25,]
 detectResult <- detect(OCRText, digram)
+# detectResult
+
+save(detectResult,file="../output/detectResult.RData")
 ```
 
 # Step 4 - Error correction
 
 Given the detected word error, in order to find the best correction, we need to generate the candidate corrections: a dictionary or a database of legal n-grams to locate one or more potential correction terms. Then we need invoke some lexical-similarity measure between the misspelled string and the candidates or a probabilistic estimate of the likelihood of the correction to rank order the candidates.
 
-The reference paper is on [topic models](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=4377099).
+The reference paper (C5) is on [topic models](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=4377099).
 
 ### 4.1 - Data Preparation
+```{r}
+source("../lib/confusionMatrix.R")
+source('../lib/outputtext.R')
+# source("../lib/CandidateWords.R")
+```
 
-* step 1: Train the LDA topic model using groundtruth training dataset
-* step 2: Get probability of topic for recognized the word in the dictionary 
-* step 3: 
+
+
+### 4.2 Implementation correction algorithm
+
+* step 0: 
+* step 1: Train the LDA topic model using groundtruth training dataset("truthTrain")
+* step 2: $\ P(t_k)$ Get probability of topics in each document
+* step 3: $\ P(w|t_k)$ Get probability  probability of words in the given topic
 
 ```{r correction}
-# the assigned paper for error correction is C5
-# step 1: train word from groundtruth with topic modeling, get the probability of each topic in each documents, probability of each word in each topic.
-# step 2: 
-# step 3:
 
-# source("../lib/CandidateWords.R")
-# source("../lib/LDA.R")
-source("../lib/confusionMatrix.R")
+# step 1: train word from groundtruth with topic modeling, get the probability of each topic in each documents, probability of each word in each topic.
 
 
 if(doConfusion == T) confMat <- commonMistakes(truthTrain, ocrTrain) else load("../output/confusionMatrix.RData")
 
-if(doLDA == T) l <- topicModelling(truthTrain) else load("../output/LDA.RData")
+if(doLDA == T) l <- topicModelling(truthTrain) else load("../output/LDA.RData") # here we choose #oftopic=30
 
 wordTopic <- tidy(l, matrix = "beta")
 docTopic <- tidy(l, matrix = "gamma")
-library(reshape2)
+
 wordTopic <- acast(wordTopic, term~topic, value.var="beta")
 docTopic <- acast(docTopic, document~topic, value.var="gamma")
 
@@ -280,6 +281,9 @@ docTopic <- acast(docTopic, document~topic, value.var="gamma")
 # # wordTopic <- as.matrix(tidy(l, matrix = "beta"))
 # # docTopic <- as.matrix(tidy(l, matrix = "gamma"))
 
+outputtext(ocrcorrect) # generates a text file for each document
+
+correctTest <- list.files(path=correctPath, pattern="*.txt", full.names=TRUE, recursive=FALSE)
 
 ```
 
@@ -289,10 +293,12 @@ docTopic <- acast(docTopic, document~topic, value.var="gamma")
 
 ```{r}
 
+
 if(doTruthWordsTable) truthTestTable <- wordsTable(truthTest, "truthTestTable") else load("../output/truthTestTable.RData")
 
 if(doOCRWordsTable) OCRTestTable <- wordsTable(ocrTest, "OCRTestTable") else load("../output/OCRTestTable.RData")
 
+if(doCorrectWordsTable) correctTestTable <- wordsTable(correctTest, "correctTestTable") else load("../output/correctTestTable.RData")
 
 if(doPerf) 
 

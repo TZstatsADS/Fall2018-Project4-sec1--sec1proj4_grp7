@@ -63,3 +63,7 @@ wordsTable <- function(fileNames, outName){
   save(list=outName, file = paste0("../output/", outName, ".RData"))
   return(eval(as.name(paste(outName))))
 }
+
+wordsTable(ocrTrain, "ocrTrainTable")
+
+
