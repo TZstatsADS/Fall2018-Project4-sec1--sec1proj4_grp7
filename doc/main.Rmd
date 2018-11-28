@@ -43,12 +43,15 @@ h4 { /* Header 4 */
 # define what to run
 
 doDic = F # dictionary for groundtruth
-doTruthWordsTable = F
-doOCRWordsTable = F
+doOCRText = F # words table for training OCRText
 doDetect = F # detection part
 doDigram = F # digram array for groundtruth
 doConfusion = F # compute confusion matrix
 doLDA = F # compute topic modelling
+doTruthWordsTable = F # words table for performance
+doOCRWordsTable = F # words table for performance
+
+
 ```
 
 
@@ -206,11 +209,13 @@ if(doDic == T) {
   load("../output/dict.RData")
 }
 
-if(doDic == T){
-  OCRText <- OCRtext("../data/tesseract/")
-} else {
-  load("../output/OCRText.RData")
-}
+if(doOCRText == T) OCRtext <- wordsTable(ocrTrain, "ocrTrainTable") else load("../output/ocrTrainTable.RData")
+
+# if(doDic == T){
+#   OCRText <- OCRtext("../data/tesseract/")
+# } else {
+#   load("../output/OCRText.RData")
+# }
 
 if(doDigram == T){
   digram <- digram(dict)
