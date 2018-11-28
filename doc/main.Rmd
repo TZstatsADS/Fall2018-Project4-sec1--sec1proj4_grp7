@@ -184,7 +184,7 @@ tesseract_if_clean <- unlist(lapply(tesseract_vec,ifCleanToken)) # source code o
 
 source("../lib/Dictionary.R")
 source("../lib/OCRText.R")
-source("../lib/digrams.R")
+source("../lib/Digram.R")
 source("../lib/detect.R")
 ```
 
