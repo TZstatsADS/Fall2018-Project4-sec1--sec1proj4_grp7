@@ -40,7 +40,6 @@ h4 { /* Header 4 */
 # Introduction {-}
 
 ```{r}
-
 # define what to run
 
 doDic = F # dictionary for groundtruth
@@ -185,7 +184,7 @@ tesseract_if_clean <- unlist(lapply(tesseract_vec,ifCleanToken)) # source code o
 
 source("../lib/Dictionary.R")
 source("../lib/OCRText.R")
-source("../lib/Digrams.R")
+source("../lib/Digram.R")
 source("../lib/detect.R")
 ```
 
@@ -196,8 +195,10 @@ source("../lib/detect.R")
 * Create the digram array including all length of words from groundtruth dataset
 
 ```{r}
+# For our dictionary (derived from groundtruth), we use all 100 documents instead of training dataset from groundtruth because we want to get a large dictionary. If we only use training dataset (80 documents), the dictionary is too small to include most of words.
+
 if(doDic == T) {
-  dict <- dictionary("../data/ground_truth/")
+  dict <- dictionary(truthFiles)
 } else {
   load("../output/dict.RData")
 }
@@ -209,7 +210,7 @@ if(doDic == T){
 }
 
 if(doDigram == T){
-  digrams <- digram(dict)
+  digram <- digram(dict)
 }else{
   load("../output/digrams.RData")
 }

@@ -4,10 +4,10 @@ library(dplyr)
 library(tidytext)
 library(broom)
 
-dictionary <- function(truthTrain){
-  
+dictionary <- function(filenames){
+  #filenames <- truthFiles
   groundTruth <- ""
-  for(x in truthTrain) groundTruth <- paste(groundTruth, readChar(x, file.info(x)$size))
+  for(x in filenames) groundTruth <- paste(groundTruth, readChar(x, file.info(x)$size))
   
   groundTruth <- strsplit(groundTruth,"\n")[[1]]
   groundTruth <- groundTruth[groundTruth!=""]
