@@ -203,7 +203,11 @@ if(doDic == T) {
 }
 
 # give the position for word in OCR trainingtext
-if(doOCRText == T) OCRtext <- wordsTable(ocrTrain, "ocrTrainTable") else load("../output/ocrTrainTable.RData")
+if(doOCRText == T){
+  OCRText <- wordsTable(ocrTrain, "ocrTrainTable")
+} else{
+  load("../output/ocrTrainTable.RData")
+}
 
 # if(doDic == T){
 #   OCRText <- OCRtext("../data/tesseract/")
@@ -213,7 +217,7 @@ if(doOCRText == T) OCRtext <- wordsTable(ocrTrain, "ocrTrainTable") else load(".
 
 # create the digram for all words in dictionary of groundtruth
 if(doDigram == T){
-  digram <- digram(dict)
+  digram <- Digram(dict)
 }else{
   load("../output/digrams.RData")
 }
@@ -241,7 +245,7 @@ The reference paper is on [topic models](https://ieeexplore.ieee.org/stamp/stamp
 
 ### 4.1 - Data Preparation
 
-* data 0: 
+* step 0: 
 * step 1: Train the LDA topic model using groundtruth training dataset("truthTrain")
 * step 2: $\ P(t_k)$ Get probability of topics in each document
 * step 3: $\ P(w|t_k)$ Get probability  probability of words in the given topic
