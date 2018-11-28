@@ -260,14 +260,18 @@ docTopic <- tidy(l, matrix = "gamma")
 
 ```
 
+
+
 # Step 5 - Performance measure
 
 ```{r}
 
-if(doTruthWordsTable == T) trueText <- wordsTable(truthTest, "truthTestTable") else load("../output/truthTestTable.RData")
+if(doTruthWordsTable) truthTestTable <- wordsTable(truthTest, "truthTestTable") else load("../output/truthTestTable.RData")
 
-if(doOCRWordsTable == T) OCRText <- wordsTable(ocrTest, "OCRTestTable") else load("../output/OCRTestTable.RData")
+if(doOCRWordsTable) OCRTestTable <- wordsTable(ocrTest, "OCRTestTable") else load("../output/OCRTestTable.RData")
 
+
+if(doPerf) 
 
 ```
 
@@ -284,6 +288,11 @@ Both *precision* and *recall* are mathematically convenient measures because the
 Here, we only finished the **word level evaluation** criterions, you are required to complete the **letter-level** part.
 
 ```{r}
+
+
+tesseract_delete_error_vec <- tesseract_vec[tesseract_if_clean] #1095
+
+
 ground_truth_vec <- str_split(paste(current_ground_truth_txt, collapse = " ")," ")[[1]] #1078
 old_intersect_vec <- vecsets::vintersect(tolower(ground_truth_vec), tolower(tesseract_vec)) #607
 new_intersect_vec <- vecsets::vintersect(tolower(ground_truth_vec), tolower(tesseract_delete_error_vec)) #600

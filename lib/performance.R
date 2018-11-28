@@ -1,4 +1,48 @@
 
+load("../output/OCRTestTable.RData")
+load("../output/truthTestTable.RData")
+
+head(truthTestTable)
+head(OCRTestTable)
+
+nDocs <- length(unique(truthTestTable[,4]))
+
+precision <- c()
+
+for(d in 1:nDocs){
+  nLines <- length(unique(truthTestTable[truthTestTable[,4] == as.character(d), 3 ]))
+  for(l in 1:nLines){
+    nWordsTruth <- length(unique(truthTestTable[(truthTestTable[,4] == as.character(d)) & 
+                            (truthTestTable[,3] == as.character(l)),
+                          2 ]))
+    nWordsOCR <- length(unique(OCRTestTable[(OCRTestTable[,4] == as.character(d)) & 
+                                                  (OCRTestTable[,3] == as.character(l)),
+                                                2 ]))
+    if(nWordsTruth == nWordsOCR){
+      for(w in 1:nWordsTruth){
+        truthWord <- truthTestTable[(truthTestTable[,4] == as.character(d)) & 
+                                      (truthTestTable[,3] == as.character(l)) &
+                                      (truthTestTable[,2] == as.character(w)),
+                                    1 ]
+        ocrWord <- OCRTestTable[(OCRTestTable[,4] == as.character(d)) & 
+                              (OCRTestTable[,3] == as.character(l)) &
+                              (OCRTestTable[,2] == as.character(w)),
+                            1 ]
+        nCharTruth <- nchar(truthWord)
+        nCharOCR <- nchar(ocrWord)
+        if(nCharTruth == nCharOCR){
+          corrects <- sum(unlist(strsplit(truthWord, split = "")) ==
+                            unlist(strsplit(ocrWord, split = "")))
+          precision <- c(precision, corrects / nCharTruth)
+          print(l)
+        }
+      }
+    }
+  }
+}
+
+save(precision, file = "../output/precision_tesseract.RData")
+
 # #original
 # ground_truth_vec <- str_split(paste(current_ground_truth_txt, collapse = " ")," ")[[1]] #1078
 # old_intersect_vec <- vecsets::vintersect(tolower(ground_truth_vec), tolower(tesseract_vec)) #607
