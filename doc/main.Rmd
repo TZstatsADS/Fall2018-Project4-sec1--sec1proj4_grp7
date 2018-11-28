@@ -152,9 +152,7 @@ ocrTest <- ocrFiles[testing]
 
 Now, we are ready to conduct post-processing, based on the Tessearct OCR output. First of all, we need to detect errors, or *incorrectly processed words* -- check to see if an input string is a valid dictionary word or if its n-grams are all legal.
 
-The referenced paper is:
-
-D2. [Letter n-gram](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1672564)
+The referenced paper (D2) is:[Letter n-gram](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1672564)
 
 - focus on positional binary digram in section 3-a.error detection
 
@@ -241,9 +239,18 @@ save(detectResult,file="../output/detectResult.RData")
 
 Given the detected word error, in order to find the best correction, we need to generate the candidate corrections: a dictionary or a database of legal n-grams to locate one or more potential correction terms. Then we need invoke some lexical-similarity measure between the misspelled string and the candidates or a probabilistic estimate of the likelihood of the correction to rank order the candidates.
 
-The reference paper is on [topic models](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=4377099).
+The reference paper (C5) is on [topic models](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=4377099).
 
 ### 4.1 - Data Preparation
+```{r}
+source("../lib/confusionMatrix.R")
+source('../lib/outputtext.R')
+# source("../lib/CandidateWords.R")
+```
+
+
+
+### 4.2 Implementation correction algorithm
 
 * step 0: 
 * step 1: Train the LDA topic model using groundtruth training dataset("truthTrain")
@@ -251,14 +258,9 @@ The reference paper is on [topic models](https://ieeexplore.ieee.org/stamp/stamp
 * step 3: $\ P(w|t_k)$ Get probability  probability of words in the given topic
 
 ```{r correction}
-# the assigned paper for error correction is C5
+
 # step 1: train word from groundtruth with topic modeling, get the probability of each topic in each documents, probability of each word in each topic.
-# step 2: 
-# step 3:
 
-# source("../lib/CandidateWords.R")
-
-source("../lib/confusionMatrix.R")
 
 if(doConfusion == T) confMat <- commonMistakes(truthTrain, ocrTrain) else load("../output/confusionMatrix.RData")
 
@@ -279,7 +281,6 @@ docTopic <- acast(docTopic, document~topic, value.var="gamma")
 # # wordTopic <- as.matrix(tidy(l, matrix = "beta"))
 # # docTopic <- as.matrix(tidy(l, matrix = "gamma"))
 
-source('../lib/outputtext.R')
 outputtext(ocrcorrect) # generates a text file for each document
 
 correctTest <- list.files(path=correctPath, pattern="*.txt", full.names=TRUE, recursive=FALSE)
