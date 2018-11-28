@@ -31,6 +31,7 @@ dictionary <- function(filenames){
   dict <- dict[nchar(dict) > 1] # no single character words
   dict <- unique(dict)
   
+  return(dict)
   save(dict, file = "../output/dict.RData")
 }
 
