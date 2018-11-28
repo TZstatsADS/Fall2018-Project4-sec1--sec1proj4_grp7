@@ -92,6 +92,7 @@ library(tidytext)
 # library(broom)
 library(topicmodels)
 library(ggplot2)
+library(reshape2)
 
 source('../lib/ifCleanToken.R')
 file_name_vec <- list.files("../data/ground_truth") #100 files in total
@@ -125,6 +126,8 @@ for(i in c(1:length(file_name_vec))){
 
 truthPath = "../data/ground_truth/"
 ocrPath = "../data/tesseract/"
+correctPath = "../output/correct/"
+
 truthFiles <- list.files(path=truthPath, pattern="*.txt", full.names=TRUE, recursive=FALSE)
 ocrFiles <- list.files(path=ocrPath, pattern="*.txt", full.names=TRUE, recursive=FALSE)
 
@@ -250,8 +253,8 @@ The reference paper is on [topic models](https://ieeexplore.ieee.org/stamp/stamp
 
 * data 0: 
 * step 1: Train the LDA topic model using groundtruth training dataset("truthTrain")
-* step 2: $\ P(t_k)$ Get probability of topics in each document; probability of words in the given topic
-* step 3: $\ P(w|t_k)$ Get probability 
+* step 2: $\ P(t_k)$ Get probability of topics in each document
+* step 3: $\ P(w|t_k)$ Get probability  probability of words in the given topic
 
 ```{r correction}
 # the assigned paper for error correction is C5
@@ -260,17 +263,17 @@ The reference paper is on [topic models](https://ieeexplore.ieee.org/stamp/stamp
 # step 3:
 
 # source("../lib/CandidateWords.R")
-# source("../lib/LDA.R")
+
 source("../lib/confusionMatrix.R")
 
 
 if(doConfusion == T) confMat <- commonMistakes(truthTrain, ocrTrain) else load("../output/confusionMatrix.RData")
 
-if(doLDA == T) l <- topicModelling(truthTrain) else load("../output/LDA.RData")
+if(doLDA == T) l <- topicModelling(truthTrain) else load("../output/LDA.RData") # here we choose #oftopic=30
 
 wordTopic <- tidy(l, matrix = "beta")
 docTopic <- tidy(l, matrix = "gamma")
-library(reshape2)
+
 wordTopic <- acast(wordTopic, term~topic, value.var="beta")
 docTopic <- acast(docTopic, document~topic, value.var="gamma")
 
@@ -283,6 +286,8 @@ docTopic <- acast(docTopic, document~topic, value.var="gamma")
 # # wordTopic <- as.matrix(tidy(l, matrix = "beta"))
 # # docTopic <- as.matrix(tidy(l, matrix = "gamma"))
 
+source('../lib/outputtext.R')
+outputtext(ocrcorrect) # generates a text file for each document
 
 ```
 
@@ -291,13 +296,13 @@ docTopic <- acast(docTopic, document~topic, value.var="gamma")
 # Step 5 - Performance measure
 
 ```{r}
-source('../lib/outputtext.R')
-outputtext(ocrcorrect) # generates a text file for each document
+
 
 if(doTruthWordsTable) truthTestTable <- wordsTable(truthTest, "truthTestTable") else load("../output/truthTestTable.RData")
 
 if(doOCRWordsTable) OCRTestTable <- wordsTable(ocrTest, "OCRTestTable") else load("../output/OCRTestTable.RData")
 
+if(doCorrectWordsTable) correctTestTable <- wordsTable(correctTest, "correctTestTable") else load("../output/correctTestTable.RData")
 
 if(doPerf) 
 

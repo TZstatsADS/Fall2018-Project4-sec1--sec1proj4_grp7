@@ -14,7 +14,7 @@ outputtext <- function(ocrcorrect){
       datarow <- paste(paste(ocrcorrect[docnumber == doc & linenumber == line,1], collapse = ""))
       data <- c(data, datarow)
     }
-  write.table(data, file = paste("../output/ocrcorrect", doc,".txt"),
+  write.table(data, file = paste("../output/correct/ocrcorrect", doc,".txt"),
               sep = "", row.names = FALSE, col.names = FALSE)
 }
 }
