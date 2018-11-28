@@ -179,16 +179,12 @@ tesseract_if_clean <- unlist(lapply(tesseract_vec,ifCleanToken)) # source code o
 ### 3.2 - Source the files
 ```{r detection}
 
-# step 1: create the dictionary from groudtruth
-# step 2: create the OCR word bag from tesseract
-# step 3: create the digram array 
-# step 4: implement detection part
-
 source("../lib/Dictionary.R") # dictionary for groundtruth dataset
 source("../lib/OCRText.R")    # bag of word of tesseract ocr text
 source("../lib/Digram.R")     # digram for all words in groundtruth 
 source("../lib/detect.R")     # detection function
 source("../lib/wordsTable.R") # function to locate the words' position in which line and document 
+
 ```
 
 ### 3.3 - Create bag of words and digram array for groungtruth and tesseract data
@@ -278,6 +274,8 @@ docTopic <- acast(docTopic, document~topic, value.var="gamma")
 
 source('../lib/outputtext.R')
 outputtext(ocrcorrect) # generates a text file for each document
+
+correctTest <- list.files(path=correctPath, pattern="*.txt", full.names=TRUE, recursive=FALSE)
 
 ```
 
