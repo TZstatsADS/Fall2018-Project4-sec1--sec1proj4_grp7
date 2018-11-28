@@ -14,6 +14,7 @@ Term: Fall 2018
 	+ Yadir Lakehal
 
 + Project summary: In this project, we will create an OCR post-processing procedure to enhance Tesseract OCR output. 
++ Presentaion: https://github.com/TZstatsADS/Fall2018-Project4-sec1--sec1proj4_grp7/blob/master/doc/ADS%20Project%204%20Gr%207.pptx
 	
 **Contribution statement**: ([default](doc/a_note_on_contributions.md)) 
 
