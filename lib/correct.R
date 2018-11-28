@@ -2,6 +2,7 @@
 source("../lib/LDA.R")
 source("../lib/differ.R")
 source("../lib/confusionMatrix.R")
+load(file="../output/confusionMatrix.RData")
 load(file = "../output/LDA.RData")
 load(file="../output/ocrerror.RData")
 
@@ -11,9 +12,9 @@ load(file="../output/ocrerror.RData")
 
 nTopics=20
 
-ocrerror[ocrerror[,5] == 1,]
-
+ocrcorrect <- MM
 ocrcorrect <- ocrerror
+
 
 for(i in 1:nrow(ocrcorrect)){
   if((ocrcorrect[i,5] == 1) & !(" " %in% unlist(strsplit(ocrcorrect[i,1], "")))){
@@ -56,9 +57,10 @@ for(i in 1:nrow(ocrcorrect)){
   
 }
 
-head(cbind(ocrcorrect[,1], ocrerror[,1]))
+compare <- head(cbind(ocrcorrect[,1], MM[,1]))
+compare
 
-  
+save(ocrcorrect,file = "../output/ocrcorrect.RData")
 
 
 
