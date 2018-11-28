@@ -189,9 +189,9 @@ source("../lib/wordsTable.R") # function to locate the words' position in which 
 
 ### 3.3 - Create bag of words and digram array for groungtruth and tesseract data
 
-* step 1: Create the dictionary from 100 groudtruth files ("dict") 
-* step 2: Create the list of incorrect words from tesseract OCR train dataset ("OCRtext")
-* step 3: Create the digram array(36*36) including numbers(0-9) and letters(a-z), from all length of words in 100 groundtruth files ("digram")
+* step 1: Create the dictionary from 100 groudtruth files | ("dict") 
+* step 2: Create the list of incorrect words from tesseract OCR train dataset | ("OCRtext") and give the position of word in which line and which document
+* step 3: Create the digram array(36*36) including numbers(0-9) and letters(a-z), from all length of words in 100 groundtruth files | ("digram")
 
 ```{r}
 # For our dictionary (derived from groundtruth), we use all 100 documents instead of training dataset from groundtruth because we want to get a large dictionary. If we only use training dataset (80 documents), the dictionary is too small to include most of words.
@@ -220,12 +220,16 @@ if(doDigram == T){
 ```
 
 ### 3.4 - Implement detection algorithm
+
+* step 0: Get list of words from OCR Train dataset, it only includes the words that length is less than 25 
+* step 1: Detect the OCR train dataset, if there is an error, label the word with 1
+
 ```{r}
-# detect the OCR train 
 # OCRText is the bag of word derived from function in OCRText.R which using OCRTrain data
 OCRText <- OCRText[nchar(OCRText[,1]) < 25,]
 detectResult <- detect(OCRText, digram)
 # detectResult
+
 save(detectResult,file="../output/detectResult.RData")
 ```
 
@@ -251,7 +255,6 @@ The reference paper is on [topic models](https://ieeexplore.ieee.org/stamp/stamp
 # source("../lib/CandidateWords.R")
 
 source("../lib/confusionMatrix.R")
-
 
 if(doConfusion == T) confMat <- commonMistakes(truthTrain, ocrTrain) else load("../output/confusionMatrix.RData")
 
