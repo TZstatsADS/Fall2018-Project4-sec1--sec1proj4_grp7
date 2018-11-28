@@ -236,6 +236,8 @@ if(doDigram == T){
 # OCRText is the bag of word derived from function in OCRText.R which using OCRTrain data
 OCRText <- OCRText[nchar(OCRText[,1]) < 25,]
 detectResult <- detect(OCRText, digram)
+# detectResult
+save(detectResult,file="../output/detectResult.RData")
 ```
 
 # Step 4 - Error correction
@@ -246,8 +248,9 @@ The reference paper is on [topic models](https://ieeexplore.ieee.org/stamp/stamp
 
 ### 4.1 - Data Preparation
 
-* step 1: Train the LDA topic model using groundtruth training dataset
-* step 2: Get probability of topic for recognized the word in the dictionary 
+* data 0: 
+* step 1: Train the LDA topic model using groundtruth training dataset("truthTrain")
+* step 2: $$\ P(t_k)$$ Get probability of topics in each document; probability of words in the given topic
 * step 3: 
 
 ```{r correction}
