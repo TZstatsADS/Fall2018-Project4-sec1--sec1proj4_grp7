@@ -194,24 +194,20 @@ source("../lib/wordsTable.R") # function to locate the words' position in which 
 ```{r}
 # For our dictionary (derived from groundtruth), we use all 100 documents instead of training dataset from groundtruth because we want to get a large dictionary. If we only use training dataset (80 documents), the dictionary is too small to include most of words.
 
-if(doDic == T) {
+if(doDic) {
   dict <- dictionary(truthFiles)
 } else {
   load("../output/dict.RData")
 }
 
 # give the position for word in OCR trainingtext
-if(doOCRText == T){
+if(doOCRText){
   OCRText <- wordsTable(ocrTrain, "ocrTrainTable")
 } else{
   load("../output/ocrTrainTable.RData")
 }
 
-# if(doDic == T){
-#   OCRText <- OCRtext("../data/tesseract/")
-# } else {
-#   load("../output/OCRText.RData")
-# }
+if(doOCRWordsTable) OCRTestTable <- wordsTable(ocrTest, "OCRTestTable") else load("../output/OCRTestTable.RData")
 
 # create the digram for all words in dictionary of groundtruth
 if(doDigram == T){
@@ -224,15 +220,14 @@ if(doDigram == T){
 ### 3.4 - Implement detection algorithm
 
 * step 0: Get list of words from OCR Train dataset, it only includes the words that length is less than 25 
-* step 1: Detect the OCR train dataset, if there is an error, label the word with 1
+* step 1: Detect the OCR test dataset, if there is an error, label the word with 1
 
 ```{r}
 # OCRText is the bag of word derived from function in OCRText.R which using OCRTrain data
-OCRText <- OCRText[nchar(OCRText[,1]) < 25,]
-detectResult <- detect(OCRText, digram)
-# detectResult
+# OCRTestTable <- OCRTestTable[nchar(OCRTestTable[,1]) < 25,]
+OCRTestErrors <- detect(OCRTestTable, digram)
 
-save(detectResult,file="../output/detectResult.RData")
+save(OCRTestErrors,file="../output/OCRTestErrors.RData")
 ```
 
 # Step 4 - Error correction
@@ -272,20 +267,10 @@ docTopic <- tidy(l, matrix = "gamma")
 wordTopic <- acast(wordTopic, term~topic, value.var="beta")
 docTopic <- acast(docTopic, document~topic, value.var="gamma")
 
-if(doCorrect == T)
-
-# # returns string w/o leading or trailing whitespace
-# trim <- function (x) gsub("^\\s+|\\s+$", "", x)
-# 
-# wordTopic[, "topic"] <- trim(wordTopic[, "topic"])
-# docTopic[, "topic"] <- trim(docTopic[, "topic"])
-# 
-# # wordTopic <- as.matrix(tidy(l, matrix = "beta"))
-# # docTopic <- as.matrix(tidy(l, matrix = "gamma"))
+if(doCorrect == T) ocrcorrect <- correct(OCRTestErrors, docTopic, wordTopic)
 
 outputtext(ocrcorrect) # generates a text file for each document
 
-correctTest <- list.files(path=correctPath, pattern="*.txt", full.names=TRUE, recursive=FALSE)
 
 ```
 
@@ -300,11 +285,21 @@ if(doTruthWordsTable) truthTestTable <- wordsTable(truthTest, "truthTestTable") 
 
 if(doOCRWordsTable) OCRTestTable <- wordsTable(ocrTest, "OCRTestTable") else load("../output/OCRTestTable.RData")
 
+correctTest <- list.files(path=correctPath, pattern="*.txt", full.names=TRUE, recursive=FALSE)
 if(doCorrectWordsTable) correctTestTable <- wordsTable(correctTest, "correctTestTable") else load("../output/correctTestTable.RData")
 
-if(doPerfTess)
+if(doPerfTess) precisionTess <- performance(truthTestTable, OCRTestTable, "precisionTess") else load("../output/precisionTess.RData")
   
-if(doPerfTessProcess)
+if(doPerfTessProcess) precisionProcessed <- performance(truthTestTable, correctTestTable, "precisionProcessed") else load("../output/precisionProcessed.RData")
+
+
+first50 <- cbind(head(truthTestTable[(nchar(OCRTestTable[,1]) > 1)[1:100] , 1], 50),
+                  head(OCRTestTable[(nchar(OCRTestTable[,1]) > 1)[1:100],1], 50),
+                  head(correctTestTable[,1], 50))
+                
+colnames(first50) <- c("truth", "tesseract", "processed tesseract")
+
+write.csv(first50, file = "../output/compare50.csv", col.names = T)
 
 ```
 
