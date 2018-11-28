@@ -291,6 +291,8 @@ docTopic <- acast(docTopic, document~topic, value.var="gamma")
 # Step 5 - Performance measure
 
 ```{r}
+source('../lib/outputtext.R')
+outputtext(ocrcorrect) # generates a text file for each document
 
 if(doTruthWordsTable) truthTestTable <- wordsTable(truthTest, "truthTestTable") else load("../output/truthTestTable.RData")
 
