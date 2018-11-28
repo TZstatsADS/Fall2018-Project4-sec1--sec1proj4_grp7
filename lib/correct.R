@@ -1,25 +1,36 @@
 
 source("../lib/LDA.R")
-source("../lib/differ.R")
-source("../lib/confusionMatrix.R")
-load(file="../output/confusionMatrix.RData")
+
+
+
 load(file = "../output/LDA.RData")
-load(file="../output/ocrerror.RData")
+load(file="../output/OCRTestTable.RData")
+load("../output/OCRTestTable.RData")
 
 # load(file="../output/wordTopic.RData")
 # load(file="../output/docTopic.RData")
+OCRTestErrors <- detect(OCRTestTable, digram)
+
+save(OCRTestErrors,file="../output/OCRTestErrors.RData")
 
 
-nTopics=30
-ocrcorrect <- ocrerror
+
+
 
 library(profvis)
 
 
-correct <- function(){
-  for(i in 1:nrow(ocrcorrect)){
-    if((ocrcorrect[i,5] == 1) & !(" " %in% unlist(strsplit(ocrcorrect[i,1], "")))){
-      candidates <- differCandidates(ocrcorrect[i,1])
+correct <- function(OCRTestErrors, docTopic, wordTopic){
+  
+  source("../lib/differ.R")
+  load(file="../output/confusionMatrix.RData")
+  
+  nTopics=30
+  OCRCorrectTable <- OCRTestErrors
+  
+  for(i in 1:nrow(OCRCorrectTable)){
+    if((OCRCorrectTable[i,5] == 1) & !(" " %in% unlist(strsplit(OCRCorrectTable[i,1], "")))){
+      candidates <- differCandidates(OCRCorrectTable[i,1])
       winner <- candidates[1]
       prevBest <- 0
       if(length(candidates) != 0){
@@ -28,8 +39,8 @@ correct <- function(){
           mistakeProb <- 1
           for(j in 1:nTopics){
             # probDoc <- docTopic[docTopic[,"topic"] == j & 
-            #                       docTopic[,"document"] == ocrcorrect[i,4],"gamma"]
-            probDoc <- docTopic[ocrcorrect[i,4], j]
+            #                       docTopic[,"document"] == OCRCorrectTable[i,4],"gamma"]
+            probDoc <- docTopic[OCRCorrectTable[i,4], j]
             # if(! candidates[k] %in% wordTopic[,"term"]){
             if(! candidates[k] %in% rownames(wordTopic)){
               probWord = 0
@@ -43,7 +54,7 @@ correct <- function(){
             pWord <- pWord + as.numeric(probDoc) * as.numeric(probWord)
           }
           
-          originalLetters <- unlist(strsplit(ocrcorrect[i,1],""))
+          originalLetters <- unlist(strsplit(OCRCorrectTable[i,1],""))
           candidateLetters <- unlist(strsplit(candidates[k],""))
           
           for(h in 1:length(originalLetters)){
@@ -56,18 +67,20 @@ correct <- function(){
           if(score > prevBest) winner <- candidates[k]; prevBest <- score
           
         }
-        ocrcorrect[i,1] <- winner
-        print(i)
+        OCRCorrectTable[i,1] <- winner
+        print(paste0("word ", i, "/", nrow(OCRCorrectTable)))
       }
     }
     
   }
+  save(OCRCorrectTable,file = "../output/OCRCorrectTable.RData")
+  return(OCRCorrectTable)
 }
 
 
-head(cbind(ocrcorrect[ocrcorrect[,5] == 1,1], ocrerror[ocrerror[,5] == 1,1]), 50)
+write.csv(head(cbind(OCRCorrectTable[OCRCorrectTable[,5] == 1,1], OCRTestTable[OCRTestTable[,5] == 1,1]), 50), file = "../output/compare50.csv")
 
 
-save(ocrcorrect,file = "../output/ocrcorrect.RData")
+
 
 

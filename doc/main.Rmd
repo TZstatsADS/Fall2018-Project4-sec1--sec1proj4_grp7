@@ -249,6 +249,7 @@ source('../lib/outputtext.R')
 ```
 
 
+
 ### 4.2 Implementation correction algorithm
 
 * step 0: 
@@ -270,6 +271,8 @@ docTopic <- tidy(l, matrix = "gamma")
 
 wordTopic <- acast(wordTopic, term~topic, value.var="beta")
 docTopic <- acast(docTopic, document~topic, value.var="gamma")
+
+if(doCorrect == T)
 
 # # returns string w/o leading or trailing whitespace
 # trim <- function (x) gsub("^\\s+|\\s+$", "", x)
@@ -299,7 +302,9 @@ if(doOCRWordsTable) OCRTestTable <- wordsTable(ocrTest, "OCRTestTable") else loa
 
 if(doCorrectWordsTable) correctTestTable <- wordsTable(correctTest, "correctTestTable") else load("../output/correctTestTable.RData")
 
-if(doPerf) 
+if(doPerfTess)
+  
+if(doPerfTessProcess)
 
 ```
 

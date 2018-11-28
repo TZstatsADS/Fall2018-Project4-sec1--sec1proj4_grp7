@@ -13,7 +13,9 @@ detect <- function(d2, digram){
   for(i in 1:nrow(d2)){
     n <- nchar(d2[i,1])
     counter <- 1
-    if(prod(unlist(strsplit(d2[i,1], "")) %in% numberletters) & suppressWarnings(is.na(as.numeric(d2[i,1])))){ 
+    if(prod(unlist(strsplit(d2[i,1], "")) %in% numberletters) & 
+       suppressWarnings(is.na(as.numeric(d2[i,1]))) &
+       nchar(d2[i,1]) < 21){ 
       # if contains mixed letters and numbers or only letters
       for(k in 1 : (n-1)){
         for(l in 2:n){
