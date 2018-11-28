@@ -226,7 +226,8 @@ if(doDigram == T){
 
 ### 3.4 - Implement detection algorithm
 ```{r}
-detect(OCRtext, digrams)
+OCRText <- OCRText[nchar(OCRText[,1]) < 25,]
+detect(OCRtext, digram)
 ```
 
 # Step 4 - Error correction

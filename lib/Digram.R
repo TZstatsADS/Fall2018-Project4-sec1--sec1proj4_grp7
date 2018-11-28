@@ -7,7 +7,8 @@ digram <- function(d){
   # d <- dict[nchar(dict) < 21]
   
   N <- max(nchar(d))
-  a <- array(0, c(N, (N-1)*N/2, 26, 26))
+  digram <- array(0, c(N, (N-1)*N/2, 36, 36))
+  numberletters <- c(0:9, letters)
   
   for(i in d){
     n <- nchar(i)
@@ -15,15 +16,16 @@ digram <- function(d){
     for(k in 1 : (n-1)){
       for(l in 2:n){
         if(k < l){
-          a[n, counter, match(substr(i, k, k), letters), 
-            match(substr(i, l, l), letters)] <- 1 
+          digram[n, counter, match(substr(i, k, k), numberletters), 
+            match(substr(i, l, l), numberletters)] <- 1 
           counter <- counter + 1
         }   
       }
     }
   }
   
-  save(a, file = "../output/digrams.RData")
+  save(digram, file = "../output/digrams.RData")
+  return(digram)
 }
 
 # 
