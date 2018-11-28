@@ -36,7 +36,7 @@ detect <- function(d2, digram){
   }
   
   table(as.numeric(d2[,5]))
-  
+  return(ocrerror<-d2)
 }
 
 #ocrErrors <- d2
