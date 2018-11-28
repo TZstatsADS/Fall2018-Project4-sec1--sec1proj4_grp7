@@ -39,7 +39,7 @@ detect <- function(d2, digram){
   table(as.numeric(d2[,5]))
   ocrerror <- d2
   return(ocrerror)
-  #save(ocrerror,file = "../output/ocrerror.RData")
+  save(ocrerror,file = "../output/ocrerror.RData")
 }
 
 
