@@ -1,56 +1,66 @@
 
-OCRText
-l
-ocrErrors
-
-for(i in 1:length(ocrErrors)){
-  if(ocrErrors[i,2]){
-    cand <- differCandidates(ocrErrors[i,1])
-    for(i in cand){
-      for(j in 1:30)
-        
-    }
-  } 
-}
-
-
-# word line documents error
-
-
-
 source("../lib/LDA.R")
 source("../lib/differ.R")
+source("../lib/confusionMatrix.R")
 load(file = "../output/LDA.RData")
-load(file="../output/OCRText.RData")
-save(file="../output/wordTopic.RData")
-save(file="../output/docTopic.RData")
+load(file="../output/ocrerror.RData")
 
-differCandidates("ompany")
-
-for (i in 1:length(ocrErrors)){
-  
-  #p_wc probability of word_c in each document
-   p_wc <- sum(p_wt*p_t)
-  
+# load(file="../output/wordTopic.RData")
+# load(file="../output/docTopic.RData")
 
 
-  #p_wt probability of word_c in topic_k per document
-  
-   
-  #p_t probability of topic_k in each document
-  doc <- OCRText[1,][4]
-  topic <- docTopic[docTopic$document == doc,]
-  topic <- as.data.frame(tpoic)
-  
-  for (j in 1:20){
-    word_tpoic <- wordTopic[wordTopic$topic == topic[1,][2],]
-    word_topic <- word_topic[wordTopic$term == OCRText[i,][1]]
-    beta <- word_topic[,3]
-    return(beta)
+nTopics=20
+
+ocrerror[ocrerror[,5] == 1,]
+
+ocrcorrect <- ocrerror
+
+for(i in 1:nrow(ocrcorrect)){
+  if((ocrcorrect[i,5] == 1) & !(" " %in% unlist(strsplit(ocrcorrect[i,1], "")))){
+    candidates <- differCandidates(ocrcorrect[i,1])
+    winner <- candidates[1]
+    prevBest <- 0
+    for(k in 1:length(candidates)){
+      pWord <- 0
+      mistakeProb <- 1
+      for(j in 1:nTopics){
+        probDoc <- docTopic[docTopic$topic == j & 
+                              docTopic$document == ocrcorrect[i,4],3]
+        if(sum(wordTopic$term == candidates[k]) == 0){
+          probWord = 0
+        }
+        else{
+        probWord <- wordTopic[wordTopic$topic == j &
+                                wordTopic$term == candidates[k], 3]
+        }
+        originalLetters <- unlist(strsplit(ocrcorrect[i,1],""))
+        candidateLetters <- unlist(strsplit(candidates[k],""))
+        
+
+        pWord <- pWord + probDoc * probWord
+      }
+      
+      for(h in 1:length(originalLetters)){
+        mistakeProb <- mistakeProb *
+          confMat[candidateLetters[h], originalLetters[h]]/
+          sum(confMat[candidateLetters[h],])
+      }
+      
+      score <- pWord * mistakeProb
+      if(score <- prevBest) winner <- candidate[k]; prevBest <- score
+      
+    }
+    ocrcorrect[i,1] <- winner
+    print(i)
   }
- 
-  p_w <- sum(robabili)
-
+  
 }
+
+head(cbind(ocrcorrect[,1], ocrerror[,1]))
+
+  
+
+
+
 
 
