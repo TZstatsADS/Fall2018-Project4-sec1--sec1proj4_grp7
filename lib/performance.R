@@ -1,9 +1,13 @@
 
 load("../output/OCRTestTable.RData")
 load("../output/truthTestTable.RData")
+load("../output/ocrcorrect.RData")
 
 head(truthTestTable)
 head(OCRTestTable)
+head(ocrcorrect)
+
+ocrcorrect[ocrcorrect[,5] == 1,]
 
 nDocs <- length(unique(truthTestTable[,4]))
 

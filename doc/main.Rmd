@@ -91,7 +91,7 @@ library(stringr)
 library(tm)
 library(dplyr)
 library(tidytext)
-#library(broom)
+# library(broom)
 library(topicmodels)
 library(ggplot2)
 
@@ -255,8 +255,19 @@ if(doLDA == T) l <- topicModelling(truthTrain) else load("../output/LDA.RData")
 
 wordTopic <- tidy(l, matrix = "beta")
 docTopic <- tidy(l, matrix = "gamma")
+library(reshape2)
+wordTopic <- acast(wordTopic, term~topic, value.var="beta")
+docTopic <- acast(docTopic, document~topic, value.var="gamma")
 
-# differCandidates(dict)
+# # returns string w/o leading or trailing whitespace
+# trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+# 
+# wordTopic[, "topic"] <- trim(wordTopic[, "topic"])
+# docTopic[, "topic"] <- trim(docTopic[, "topic"])
+# 
+# # wordTopic <- as.matrix(tidy(l, matrix = "beta"))
+# # docTopic <- as.matrix(tidy(l, matrix = "gamma"))
+
 
 ```
 
