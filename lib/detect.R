@@ -5,7 +5,7 @@ load("../output/digrams.RData")
 
 #d2 <- OCRText[nchar(OCRText[,1]) < 21,]
 
-detect <- function(d2){
+detect <- function(d2, digram){
   #d2 <- OCRText
   d2 <- d2[nchar(d2[,1]) > 1,] # no single character words
   numberletters <- c(0:9, letters)
@@ -39,7 +39,7 @@ detect <- function(d2){
   
 }
 
-ocrErrors <- d2
+#ocrErrors <- d2
 
 
 
