@@ -10,27 +10,14 @@ load(file="../output/ocrerror.RData")
 # load(file="../output/docTopic.RData")
 
 
-nTopics=20
-
-ocrcorrect <- MM
+nTopics=30
 ocrcorrect <- ocrerror
 
 library(profvis)
 
-wordTopicVec_top <- wordTopic[,"topic"]
-docTopicVec_top <- docTopic[,"topic"]
-wordTopicVec_term <- wordTopic[,"term"]
-docTopicVec_doc <- docTopic[,"document"]
-
-docTopic[,"document"]
-
-str(docTopic)
-colnames(docTopic)
 
 correct <- function(){
-  profvis({
-  for(i in 1:1000){
-    # for(i in 1:nrow(ocrcorrect)){
+  for(i in 1:nrow(ocrcorrect)){
     if((ocrcorrect[i,5] == 1) & !(" " %in% unlist(strsplit(ocrcorrect[i,1], "")))){
       candidates <- differCandidates(ocrcorrect[i,1])
       winner <- candidates[1]
@@ -42,7 +29,7 @@ correct <- function(){
           for(j in 1:nTopics){
             # probDoc <- docTopic[docTopic[,"topic"] == j & 
             #                       docTopic[,"document"] == ocrcorrect[i,4],"gamma"]
-            probDoc <- docTopic[j, ocrcorrect[i,4]]
+            probDoc <- docTopic[ocrcorrect[i,4], j]
             # if(! candidates[k] %in% wordTopic[,"term"]){
             if(! candidates[k] %in% rownames(wordTopic)){
               probWord = 0
@@ -75,12 +62,7 @@ correct <- function(){
     }
     
   }
-  })
 }
-
-
-compare <- head(cbind(ocrcorrect[,1], MM[,1]))
-compare
 
 
 head(cbind(ocrcorrect[ocrcorrect[,5] == 1,1], ocrerror[ocrerror[,5] == 1,1]), 50)
