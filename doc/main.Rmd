@@ -81,6 +81,8 @@ if (!require("pacman")) {
   install_github("trinker/pacman")
 }
 
+if (!require("textreg")) install.packages("textreg")
+
 pacman::p_load(knitr, readr, stringr, tesseract, vecsets)
 source('../lib/ifCleanToken.R')
 file_name_vec <- list.files("../data/ground_truth") #100 files in total
@@ -89,7 +91,7 @@ library(stringr)
 library(tm)
 library(dplyr)
 library(tidytext)
-library(broom)
+#library(broom)
 library(topicmodels)
 library(ggplot2)
 
