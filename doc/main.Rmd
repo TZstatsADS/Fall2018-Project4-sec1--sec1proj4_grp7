@@ -250,8 +250,8 @@ The reference paper is on [topic models](https://ieeexplore.ieee.org/stamp/stamp
 
 * data 0: 
 * step 1: Train the LDA topic model using groundtruth training dataset("truthTrain")
-* step 2: $$\ P(t_k)$$ Get probability of topics in each document; probability of words in the given topic
-* step 3: 
+* step 2: $\ P(t_k)$ Get probability of topics in each document; probability of words in the given topic
+* step 3: $\ P(w|t_k)$ Get probability 
 
 ```{r correction}
 # the assigned paper for error correction is C5
