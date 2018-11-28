@@ -5,8 +5,8 @@ load("../output/digrams.RData")
 
 #d2 <- OCRText[nchar(OCRText[,1]) < 21,]
 
-detect <- function(d2){
-  #d2 <- OCRText
+detect <- function(d2, digram){
+  #d2 <- OCRtext[nchar(OCRtext[,1]) < 25,]
   d2 <- d2[nchar(d2[,1]) > 1,] # no single character words
   numberletters <- c(0:9, letters)
 
@@ -14,13 +14,14 @@ detect <- function(d2){
   for(i in 1:nrow(d2)){
     n <- nchar(d2[i,1])
     counter <- 1
-    if(prod(unlist(strsplit(d2[i,1], "")) %in% numberletters)){ # if contains only letters
+    if(prod(unlist(strsplit(d2[i,1], "")) %in% numberletters) & suppressWarnings(is.na(as.numeric(d2[i,1])))){ 
+      # if contains mixed letters and numbers or only letters
       for(k in 1 : (n-1)){
         for(l in 2:n){
           if(k < l){
             # cat(i, " ", k, " ", l)
             if(digram[n, counter, match(substr(d2[i,1], k, k), numberletters), 
-                match(substr(d2[i,1], l, l), letters)] == 0){
+                match(substr(d2[i,1], l, l), numberletters)] == 0){
               d2[i,5] <- 1
               stop = TRUE
               break
@@ -36,11 +37,10 @@ detect <- function(d2){
   }
   
   table(as.numeric(d2[,5]))
-  
+  ocrerror <- d2
+  return(ocrerror)
+  #save(ocrerror,file = "../output/ocrerror.RData")
 }
-
-ocrErrors <- d2
-
 
 
 

@@ -54,5 +54,5 @@ differCandidates <- function(w){
       }
     }
   }
-  return (paste(cand, w)) 
+  return (paste0(cand, w)) 
 }
