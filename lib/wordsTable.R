@@ -60,6 +60,6 @@ wordsTable <- function(fileNames, outName){
   bag[,1] <- b
   
   assign(outName, bag)
-  save(list=outName, file = paste0("../output/", outName, ".RData"))
+  save(outName, file = paste("../output/", outName, ".RData"))
   return(eval(as.name(paste(outName))))
 }
