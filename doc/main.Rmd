@@ -43,6 +43,8 @@ h4 { /* Header 4 */
 # define what to run
 
 doDic = F # dictionary for groundtruth
+doTruthWordsTable = F
+doOCRWordsTable = F
 doDetect = F # detection part
 doDigram = F # digram array for groundtruth
 doConfusion = F # compute confusion matrix
@@ -186,6 +188,7 @@ source("../lib/Dictionary.R")
 source("../lib/OCRText.R")
 source("../lib/Digram.R")
 source("../lib/detect.R")
+source("../lib/wordsTable.R")
 ```
 
 ### 3.3 - Create bag of words and digram array for groungtruth and tesseract data
@@ -250,6 +253,16 @@ docTopic <- tidy(l, matrix = "gamma")
 ```
 
 # Step 5 - Performance measure
+
+```{r}
+
+if(doTruthWordsTable == T) trueText <- wordsTable(truthTest, "truthTestTable") else load("../output/truthTestTable.RData")
+
+if(doOCRWordsTable == T) OCRText <- wordsTable(ocrTest, "OCRTestTable") else load("../output/OCRTestTable.RData")
+
+
+```
+
 
 The two most common OCR accuracy measures are precision and recall. Both are relative measures of the OCR accuracy because they are computed as ratios of the correct output to the total output (precision) or input (recall). More formally defined,
 \begin{align*}

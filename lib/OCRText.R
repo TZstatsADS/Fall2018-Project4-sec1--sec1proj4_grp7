@@ -64,6 +64,7 @@ OCRText <- function(ocrTrain){
   bag[,1] <- b
   OCRText <- bag
   save(OCRText, file = "../output/OCRText.RData")
+  
 }
 
 
